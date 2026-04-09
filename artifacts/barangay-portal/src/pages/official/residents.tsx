@@ -1,0 +1,215 @@
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { PortalHeader } from "@/components/portal/header";
+import { useSidebarToggle } from "@/components/portal/portal-layout";
+import { mockResidents } from "@/lib/mock-data";
+import { Users, Search, Plus, X, Phone, MapPin, User, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+type Gender = "Male" | "Female";
+type CivilStatus = "Single" | "Married" | "Widowed" | "Separated";
+type ResidentStatus = "active" | "inactive";
+
+interface Resident {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  birthDate: string;
+  gender: Gender;
+  civilStatus: CivilStatus;
+  status: ResidentStatus;
+}
+
+export default function OfficialResidentsPage() {
+  const { toggle } = useSidebarToggle();
+  const { toast } = useToast();
+  const [residents, setResidents] = useState<Resident[]>(mockResidents as Resident[]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | ResidentStatus>("all");
+  const [selected, setSelected] = useState<Resident | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const filtered = residents.filter(r => {
+    const m = r.name.toLowerCase().includes(search.toLowerCase())
+      || r.id.toLowerCase().includes(search.toLowerCase())
+      || r.address.toLowerCase().includes(search.toLowerCase());
+    const f = filter === "all" || r.status === filter;
+    return m && f;
+  });
+
+  const [form, setForm] = useState({
+    name: "", email: "", phone: "", address: "",
+    birthDate: "", gender: "Male" as Gender,
+    civilStatus: "Single" as CivilStatus,
+  });
+
+  const handleAddResident = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newRes: Resident = {
+      id: `RES-00${residents.length + 6}`,
+      ...form,
+      status: "active",
+    };
+    setResidents(prev => [newRes, ...prev]);
+    setShowForm(false);
+    toast({ title: "Resident Added", description: `${form.name} has been registered.` });
+    setForm({ name: "", email: "", phone: "", address: "", birthDate: "", gender: "Male", civilStatus: "Single" });
+  };
+
+  const getAge = (birthDate: string) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  };
+
+  return (
+    <div className="flex-1 flex flex-col">
+      <PortalHeader
+        title="Residents"
+        description={`${residents.filter(r => r.status === "active").length} active residents`}
+        onMenuClick={toggle}
+        actions={
+          <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" onClick={() => setShowForm(true)} data-testid="button-add-resident">
+            <Plus className="w-4 h-4" /> Add Resident
+          </Button>
+        }
+      />
+
+      <div className="p-4 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input placeholder="Search residents..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} data-testid="input-search" />
+          </div>
+          <div className="flex gap-2">
+            {(["all", "active", "inactive"] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-all ${filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+              >
+                {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Resident Detail Modal */}
+        {selected && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md p-6 shadow-2xl animate-fadeUp">
+              <div className="flex items-start justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                    <span className="text-xl font-bold text-primary">{selected.name.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-foreground">{selected.name}</h2>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${selected.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{selected.status}</span>
+                  </div>
+                </div>
+                <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { label: "Resident ID", value: selected.id },
+                  { label: "Email", value: selected.email },
+                  { label: "Phone", value: selected.phone },
+                  { label: "Address", value: selected.address },
+                  { label: "Birth Date", value: `${new Date(selected.birthDate).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" })} (${getAge(selected.birthDate)} yrs)` },
+                  { label: "Gender", value: selected.gender },
+                  { label: "Civil Status", value: selected.civilStatus },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-3">
+                    <span className="text-xs text-muted-foreground w-28 shrink-0 mt-0.5">{item.label}</span>
+                    <span className="text-sm font-medium text-foreground">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Add Resident Form */}
+        {showForm && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
+            <Card className="w-full max-w-lg p-6 shadow-2xl my-4 animate-fadeUp">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-bold text-foreground">Register New Resident</h2>
+                <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleAddResident} className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2"><Label>Full Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Juan dela Cruz" className="mt-1" required data-testid="input-name" /></div>
+                  <div><Label>Email</Label><Input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} type="email" className="mt-1" required data-testid="input-email" /></div>
+                  <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="09XXXXXXXXX" className="mt-1" required data-testid="input-phone" /></div>
+                  <div className="sm:col-span-2"><Label>Address (Purok)</Label><Input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="Purok X, Barangay Santiago" className="mt-1" required data-testid="input-address" /></div>
+                  <div><Label>Birth Date</Label><Input type="date" value={form.birthDate} onChange={e => setForm(p => ({ ...p, birthDate: e.target.value }))} className="mt-1" required /></div>
+                  <div>
+                    <Label>Gender</Label>
+                    <select value={form.gender} onChange={e => setForm(p => ({ ...p, gender: e.target.value as Gender }))} className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40">
+                      <option>Male</option><option>Female</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label>Civil Status</Label>
+                    <select value={form.civilStatus} onChange={e => setForm(p => ({ ...p, civilStatus: e.target.value as CivilStatus }))} className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40">
+                      <option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">Cancel</Button>
+                  <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" data-testid="button-submit-resident">Register Resident</Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        )}
+
+        {/* Residents List */}
+        <p className="text-sm text-muted-foreground">{filtered.length} resident{filtered.length !== 1 ? "s" : ""} found</p>
+        <div className="space-y-2">
+          {filtered.map(r => (
+            <Card
+              key={r.id}
+              className="p-4 border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer"
+              onClick={() => setSelected(r)}
+              data-testid={`resident-row-${r.id}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center shrink-0">
+                  <span className="font-bold text-primary text-sm">{r.name.charAt(0)}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{r.name}</p>
+                  <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{r.address.split(",")[0]}</span>
+                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{r.phone}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${r.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{r.status}</span>
+                  <Eye className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
