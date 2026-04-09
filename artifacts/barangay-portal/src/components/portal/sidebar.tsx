@@ -1,10 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { useNotifications } from "@/lib/notifications-context";
 import {
   LayoutDashboard, FileText, Megaphone, ClipboardList, Users, FolderKanban,
-  Package, BookOpen, Building2, User, LogOut, X, Shield, Home, Bell
+  Package, BookOpen, Building2, User, LogOut, X, Shield, Home
 } from "lucide-react";
 
 interface SidebarProps {
@@ -24,7 +23,6 @@ const residentNavItems: NavItem[] = [
   { label: "Announcements", href: "/resident/announcements", icon: Megaphone },
   { label: "Blotter Report", href: "/resident/blotter", icon: ClipboardList },
   { label: "Programs", href: "/resident/programs", icon: FolderKanban },
-  { label: "Notifications", href: "/resident/notifications", icon: Bell },
   { label: "My Profile", href: "/resident/profile", icon: User },
 ];
 
@@ -38,21 +36,18 @@ const officialNavItems: NavItem[] = [
   { label: "Assets", href: "/official/assets", icon: Package },
   { label: "Ordinances", href: "/official/ordinances", icon: BookOpen },
   { label: "Businesses", href: "/official/businesses", icon: Building2 },
-  { label: "Notifications", href: "/official/notifications", icon: Bell },
   { label: "My Profile", href: "/official/profile", icon: User },
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const { userData, logout } = useAuth();
   const [location] = useLocation();
-  const { unreadCount } = useNotifications();
 
   const navItems = userData?.role === "official" ? officialNavItems : residentNavItems;
   const isOfficial = userData?.role === "official";
 
   return (
     <>
-      {/* Mobile overlay */}
       {open && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -60,7 +55,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full z-50 flex flex-col transition-all duration-300
           bg-sidebar border-r border-sidebar-border shadow-xl
@@ -69,7 +63,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           md:translate-x-0 md:relative md:z-auto md:shadow-none
         `}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
@@ -93,7 +86,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* User info */}
         <div className="px-4 py-3 border-b border-sidebar-border/50 bg-sidebar-accent/30">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
@@ -106,7 +98,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
           {navItems.map((item) => {
             const active = location === item.href || location.startsWith(item.href + "/");
@@ -124,18 +115,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               >
                 <item.icon className="w-4.5 h-4.5 shrink-0" />
                 <span className="truncate flex-1">{item.label}</span>
-                {item.label === "Notifications" && unreadCount > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none
-                    ${active ? "bg-white/30 text-white" : "bg-red-500 text-white"}`}>
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Logout */}
         <div className="p-3 border-t border-sidebar-border">
           <Button
             variant="ghost"

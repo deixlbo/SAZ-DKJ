@@ -19,7 +19,6 @@ import ResidentAnnouncementsPage from "@/pages/resident/announcements";
 import ResidentBlotterPage from "@/pages/resident/blotter";
 import ResidentProgramsPage from "@/pages/resident/programs";
 import ResidentProfilePage from "@/pages/resident/profile";
-import ResidentNotificationsPage from "@/pages/resident/notifications";
 
 // Official portal pages
 import OfficialDashboard from "@/pages/official/dashboard";
@@ -32,7 +31,6 @@ import OfficialAssetsPage from "@/pages/official/assets";
 import OfficialOrdinancesPage from "@/pages/official/ordinances";
 import OfficialBusinessesPage from "@/pages/official/businesses";
 import OfficialProfilePage from "@/pages/official/profile";
-import OfficialNotificationsPage from "@/pages/official/notifications";
 
 const queryClient = new QueryClient();
 
@@ -91,11 +89,6 @@ function Router() {
           <PortalLayout><ResidentProfilePage /></PortalLayout>
         </RequireAuth>
       </Route>
-      <Route path="/resident/notifications">
-        <RequireAuth role="resident">
-          <PortalLayout><ResidentNotificationsPage /></PortalLayout>
-        </RequireAuth>
-      </Route>
 
       {/* Official portal routes */}
       <Route path="/official/dashboard">
@@ -146,11 +139,6 @@ function Router() {
       <Route path="/official/profile">
         <RequireAuth role="official">
           <PortalLayout><OfficialProfilePage /></PortalLayout>
-        </RequireAuth>
-      </Route>
-      <Route path="/official/notifications">
-        <RequireAuth role="official">
-          <PortalLayout><OfficialNotificationsPage /></PortalLayout>
         </RequireAuth>
       </Route>
 
