@@ -1,4 +1,5 @@
 import { Menu } from "lucide-react";
+import { NotificationBell } from "./notification-bell";
 
 interface PortalHeaderProps {
   title: string;
@@ -26,9 +27,12 @@ export function PortalHeader({ title, description, onMenuClick, actions }: Porta
             <p className="text-sm text-muted-foreground mt-0.5 truncate">{description}</p>
           )}
         </div>
-        {actions && (
-          <div className="flex items-center gap-2 shrink-0">{actions}</div>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <NotificationBell />
+          {actions && (
+            <div className="flex items-center gap-2">{actions}</div>
+          )}
+        </div>
       </div>
     </div>
   );

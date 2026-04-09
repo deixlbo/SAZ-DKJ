@@ -1,9 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { useNotifications } from "@/lib/notifications-context";
 import {
   LayoutDashboard, FileText, Megaphone, ClipboardList, Users, FolderKanban,
-  Package, BookOpen, Building2, User, LogOut, X, Shield, Home
+  Package, BookOpen, Building2, User, LogOut, X, Shield, Home, Bell
 } from "lucide-react";
 
 interface SidebarProps {
@@ -23,6 +24,7 @@ const residentNavItems: NavItem[] = [
   { label: "Announcements", href: "/resident/announcements", icon: Megaphone },
   { label: "Blotter Report", href: "/resident/blotter", icon: ClipboardList },
   { label: "Programs", href: "/resident/programs", icon: FolderKanban },
+  { label: "Notifications", href: "/resident/notifications", icon: Bell },
   { label: "My Profile", href: "/resident/profile", icon: User },
 ];
 
@@ -36,12 +38,14 @@ const officialNavItems: NavItem[] = [
   { label: "Assets", href: "/official/assets", icon: Package },
   { label: "Ordinances", href: "/official/ordinances", icon: BookOpen },
   { label: "Businesses", href: "/official/businesses", icon: Building2 },
+  { label: "Notifications", href: "/official/notifications", icon: Bell },
   { label: "My Profile", href: "/official/profile", icon: User },
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const { userData, logout } = useAuth();
   const [location] = useLocation();
+  const { unreadCount } = useNotifications();
 
   const navItems = userData?.role === "official" ? officialNavItems : residentNavItems;
   const isOfficial = userData?.role === "official";
@@ -119,7 +123,13 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   }`}
               >
                 <item.icon className="w-4.5 h-4.5 shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate flex-1">{item.label}</span>
+                {item.label === "Notifications" && unreadCount > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none
+                    ${active ? "bg-white/30 text-white" : "bg-red-500 text-white"}`}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </Link>
             );
           })}
