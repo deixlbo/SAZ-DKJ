@@ -15,6 +15,20 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **AI**: OpenAI via Replit AI Integrations (gpt-5-mini) — chatbot assistant
+
+## Workflows
+
+- **Start application**: Portal frontend (port 23288, BASE_PATH=/)
+- **Start Backend**: API server (port 8080)
+
+## AI Chatbot
+
+- Floating chat bubble on all portal pages (bottom right corner)
+- Answers questions about barangay processes, document requirements, registration, blotter
+- Backend: `artifacts/api-server/src/routes/openai/` — SSE streaming with conversation persistence
+- Frontend: `artifacts/barangay-portal/src/components/chatbot/chatbot.tsx`
+- DB tables: `conversations`, `messages` (Drizzle schema in `lib/db/src/schema/`)
 
 ## Key Commands
 

@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { PortalLayout } from "@/components/portal/portal-layout";
+import { Chatbot } from "@/components/chatbot/chatbot";
 import NotFound from "@/pages/not-found";
 
 // Public pages
@@ -155,6 +156,7 @@ function App() {
             <Router />
           </WouterRouter>
           <Toaster />
+          <Chatbot />
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
