@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Bell, FileText, ClipboardList, Megaphone, UserCheck, Info, CheckCheck, ArrowRight } from "lucide-react";
-import { Link } from "wouter";
+import { Bell, FileText, ClipboardList, Megaphone, UserCheck, Info, CheckCheck } from "lucide-react";
 import { useNotifications, type Notification, type NotificationCategory } from "@/lib/notifications-context";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/lib/auth-context";
 
 function timeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -75,13 +73,8 @@ function NotificationItem({ n, onClick }: { n: Notification; onClick: () => void
 
 export function NotificationBell() {
   const { notifications, unreadCount, markAllRead } = useNotifications();
-  const { userData } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  const notifPath = userData?.role === "official"
-    ? "/official/notifications"
-    : "/resident/notifications";
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -146,14 +139,6 @@ export function NotificationBell() {
             )}
           </div>
 
-          <div className="border-t border-border px-4 py-2.5">
-            <Link href={notifPath} onClick={() => setOpen(false)}>
-              <button className="w-full text-xs text-primary hover:text-primary/80 font-medium flex items-center justify-center gap-1 transition">
-                View all notifications
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </Link>
-          </div>
         </div>
       )}
     </div>
