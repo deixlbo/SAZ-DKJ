@@ -46,6 +46,7 @@ export default function OfficialDashboard() {
         title="Official Dashboard"
         description={`Good day, ${userData?.fullName}!`}
         onMenuClick={toggle}
+        showNotifications
       />
 
       <div className="p-4 sm:p-6 space-y-6">

@@ -39,6 +39,7 @@ export default function ResidentDashboard() {
         title="Dashboard"
         description={`Welcome back, ${userData?.fullName?.split(" ")[0] ?? "Resident"}!`}
         onMenuClick={toggle}
+        showNotifications
       />
 
       <div className="p-4 sm:p-6 space-y-6">

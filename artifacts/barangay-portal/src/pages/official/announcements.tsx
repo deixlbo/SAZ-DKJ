@@ -9,7 +9,7 @@ import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { MiniCalendar } from "@/components/portal/mini-calendar";
 import { useAuth } from "@/lib/auth-context";
 import { mockAnnouncements } from "@/lib/mock-data";
-import { Megaphone, Plus, X, Trash2, AlertTriangle, Sparkles, CalendarDays, List, Pencil, Check } from "lucide-react";
+import { Megaphone, Plus, X, Trash2, AlertTriangle, CalendarDays, List, Pencil, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Priority = "high" | "medium" | "low";
@@ -39,7 +39,6 @@ export default function OfficialAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements as Announcement[]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
   const [view, setView] = useState<"list" | "calendar">("list");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -66,9 +65,7 @@ export default function OfficialAnnouncementsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      setAnnouncements(prev => prev.map(a => a.id === editingId
-        ? { ...a, ...form }
-        : a));
+      setAnnouncements(prev => prev.map(a => a.id === editingId ? { ...a, ...form } : a));
       toast({ title: "Announcement Updated", description: "Changes saved successfully." });
     } else {
       const newAnn: Announcement = {
@@ -91,29 +88,6 @@ export default function OfficialAnnouncementsPage() {
   const handleDelete = (id: string) => {
     setAnnouncements(prev => prev.filter(a => a.id !== id));
     toast({ title: "Deleted", description: "Announcement removed." });
-  };
-
-  const handleAiWrite = async () => {
-    if (!form.title.trim()) {
-      toast({ title: "Add a title first", variant: "destructive" });
-      return;
-    }
-    setAiLoading(true);
-    await new Promise(r => setTimeout(r, 1800));
-    setAiLoading(false);
-    setForm(p => ({
-      ...p,
-      content: `The Barangay Santiago Saz invites all residents to ${p.title.toLowerCase().replace("!", "")}.
-
-${p.category === "Event" ? "All residents are encouraged to attend and participate in this community event." : "Please be informed and take the necessary precautions."}
-
-For more information, please contact the Barangay Hall during office hours (Monday to Friday, 8:00 AM to 5:00 PM) or call 0912-345-6789.
-
-Thank you for your continued support and cooperation.
-
-– Barangay Santiago Saz Administration`,
-    }));
-    toast({ title: "Content Generated", description: "AI has written the announcement content for you." });
   };
 
   return (
@@ -170,13 +144,8 @@ Thank you for your continued support and cooperation.
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <Label>Content</Label>
-                    <Button type="button" size="sm" variant="outline" onClick={handleAiWrite} disabled={aiLoading} className="h-7 text-xs gap-1 border-purple-300 text-purple-700 hover:bg-purple-50">
-                      <Sparkles className="w-3 h-3" /> {aiLoading ? "Generating..." : "AI Write"}
-                    </Button>
-                  </div>
-                  <Textarea value={form.content} onChange={e => setForm(p => ({ ...p, content: e.target.value }))} placeholder="Type or use AI Write to generate content..." className="min-h-[150px]" required />
+                  <Label>Content</Label>
+                  <Textarea value={form.content} onChange={e => setForm(p => ({ ...p, content: e.target.value }))} placeholder="Write your announcement content..." className="mt-1 min-h-[150px]" required />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }} className="flex-1">Cancel</Button>

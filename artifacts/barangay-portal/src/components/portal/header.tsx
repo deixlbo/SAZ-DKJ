@@ -6,9 +6,10 @@ interface PortalHeaderProps {
   description?: string;
   onMenuClick?: () => void;
   actions?: React.ReactNode;
+  showNotifications?: boolean;
 }
 
-export function PortalHeader({ title, description, onMenuClick, actions }: PortalHeaderProps) {
+export function PortalHeader({ title, description, onMenuClick, actions, showNotifications = false }: PortalHeaderProps) {
   return (
     <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="flex items-center gap-3 px-4 sm:px-6 py-4">
@@ -28,7 +29,7 @@ export function PortalHeader({ title, description, onMenuClick, actions }: Porta
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <NotificationBell />
+          {showNotifications && <NotificationBell />}
           {actions && (
             <div className="flex items-center gap-2">{actions}</div>
           )}
