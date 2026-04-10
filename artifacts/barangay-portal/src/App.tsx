@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import ResidentLoginPage from "@/pages/login/resident-login";
 import OfficialLoginPage from "@/pages/login/official-login";
+import RegisterPage from "@/pages/register";
 
 // Resident portal pages
 import ResidentDashboard from "@/pages/resident/dashboard";
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login/resident" component={ResidentLoginPage} />
       <Route path="/login/official" component={OfficialLoginPage} />
+      <Route path="/register" component={RegisterPage} />
 
       {/* Resident portal routes */}
       <Route path="/resident/dashboard">

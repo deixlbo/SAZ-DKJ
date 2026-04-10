@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Users, Eye, EyeOff, AlertCircle, Shield, ArrowLeft } from "lucide-react";
+import { Users, Eye, EyeOff, AlertCircle, Shield, ArrowLeft, UserPlus, Clock } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 export default function ResidentLoginPage() {
@@ -116,12 +116,25 @@ export default function ResidentLoginPage() {
             </p>
           </div>
 
-          <div className="mt-4 text-center">
-            <Link href="/login/official">
-              <button className="text-sm text-muted-foreground hover:text-foreground transition flex items-center gap-1 mx-auto">
-                <Shield className="w-3.5 h-3.5" /> Login as Official instead
+          <div className="mt-4 space-y-3">
+            <Link href="/register">
+              <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/5 transition text-sm font-medium">
+                <UserPlus className="w-4 h-4" /> Create a Resident Account
               </button>
             </Link>
+
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 flex items-start gap-2">
+              <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>New registrations require barangay official approval before you can log in.</span>
+            </div>
+
+            <div className="text-center">
+              <Link href="/login/official">
+                <button className="text-sm text-muted-foreground hover:text-foreground transition flex items-center gap-1 mx-auto">
+                  <Shield className="w-3.5 h-3.5" /> Login as Official instead
+                </button>
+              </Link>
+            </div>
           </div>
         </Card>
       </div>
