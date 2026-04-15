@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { mockAssets } from "@/lib/mock-data";
-import { Package, Plus, X, Search, Eye, Pencil, Trash2, MapPin } from "lucide-react";
+import { Package, Plus, X, Search, Pencil, Trash2, MapPin, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type AssetCategory = "Vehicle" | "IT Equipment" | "Equipment" | "Furniture" | "Other";
@@ -25,6 +25,7 @@ interface Asset {
   acquisitionCost: number;
   serialNumber?: string;
   warranty?: string;
+  imageUrl?: string;
 }
 
 const statusColors: Record<AssetStatus, string> = {
@@ -46,14 +47,31 @@ const emptyForm = {
   acquisitionDate: "",
   acquisitionCost: "",
   serialNumber: "",
+  imageUrl: "",
 };
 
-// Enrich mock data with quantity and status fields
 const enrichMockAssets = (assets: any[]): Asset[] => assets.map((a, i) => ({
   ...a,
   quantity: a.quantity ?? [2, 1, 1, 5, 3, 4][i % 6] ?? 1,
   status: a.status ?? (["Active", "Active", "In Repair", "Active", "Retired", "For Disposal"][i % 6] as AssetStatus),
+  imageUrl: a.imageUrl ?? undefined,
 }));
+
+function AssetThumbnail({ imageUrl, name, size = "md" }: { imageUrl?: string; name: string; size?: "sm" | "md" | "lg" }) {
+  const dims = size === "sm" ? "w-10 h-10" : size === "lg" ? "w-24 h-24" : "w-12 h-12";
+  if (imageUrl) {
+    return (
+      <div className={`${dims} rounded-lg overflow-hidden border border-border/50 shrink-0`}>
+        <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className={`${dims} rounded-lg bg-muted flex items-center justify-center shrink-0 border border-dashed border-border`}>
+      <Package className={`${size === "sm" ? "w-4 h-4" : size === "lg" ? "w-8 h-8" : "w-5 h-5"} text-muted-foreground`} />
+    </div>
+  );
+}
 
 export default function OfficialAssetsPage() {
   const { toggle } = useSidebarToggle();
@@ -66,6 +84,8 @@ export default function OfficialAssetsPage() {
   const [categoryFilter, setCategoryFilter] = useState<"all" | AssetCategory>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | AssetStatus>("all");
   const [form, setForm] = useState(emptyForm);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const detailFileRef = useRef<HTMLInputElement>(null);
 
   const filtered = assets.filter(a => {
     const m = a.name.toLowerCase().includes(search.toLowerCase())
@@ -97,6 +117,7 @@ export default function OfficialAssetsPage() {
       acquisitionDate: asset.acquisitionDate,
       acquisitionCost: String(asset.acquisitionCost),
       serialNumber: asset.serialNumber || "",
+      imageUrl: asset.imageUrl || "",
     });
     setEditingId(asset.id);
     setSelected(null);
@@ -107,6 +128,11 @@ export default function OfficialAssetsPage() {
     setAssets(prev => prev.filter(a => a.id !== id));
     setSelected(null);
     toast({ title: "Asset Removed", description: "The asset has been deleted from inventory." });
+  };
+
+  const handleImageFile = (file: File, onUrl: (url: string) => void) => {
+    const url = URL.createObjectURL(file);
+    onUrl(url);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -124,6 +150,7 @@ export default function OfficialAssetsPage() {
         acquisitionDate: form.acquisitionDate,
         acquisitionCost: parseFloat(form.acquisitionCost) || 0,
         serialNumber: form.serialNumber || undefined,
+        imageUrl: form.imageUrl || undefined,
       } : a));
       toast({ title: "Asset Updated", description: `"${form.name}" has been updated.` });
     } else {
@@ -139,6 +166,7 @@ export default function OfficialAssetsPage() {
         acquisitionDate: form.acquisitionDate,
         acquisitionCost: parseFloat(form.acquisitionCost) || 0,
         serialNumber: form.serialNumber || undefined,
+        imageUrl: form.imageUrl || undefined,
       };
       setAssets(prev => [newAsset, ...prev]);
       toast({ title: "Asset Registered", description: `"${form.name}" added to inventory.` });
@@ -146,6 +174,14 @@ export default function OfficialAssetsPage() {
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
+  };
+
+  const updateDetailImage = (file: File) => {
+    if (!selected) return;
+    const url = URL.createObjectURL(file);
+    setAssets(prev => prev.map(a => a.id === selected.id ? { ...a, imageUrl: url } : a));
+    setSelected(prev => prev ? { ...prev, imageUrl: url } : prev);
+    toast({ title: "Image Updated", description: "Asset image has been updated." });
   };
 
   return (
@@ -222,6 +258,33 @@ export default function OfficialAssetsPage() {
                 </div>
               </div>
 
+              {/* Asset Image */}
+              <div className="mb-4">
+                <div className="relative group">
+                  {selected.imageUrl ? (
+                    <div className="w-full h-44 rounded-xl overflow-hidden border border-border/50">
+                      <img src={selected.imageUrl} alt={selected.name} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-44 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-muted/30">
+                      <Package className="w-10 h-10 text-muted-foreground/40" />
+                      <p className="text-xs text-muted-foreground">No image uploaded</p>
+                    </div>
+                  )}
+                  <label className="absolute bottom-2 right-2 flex items-center gap-1.5 text-xs bg-white/90 text-gray-700 border border-border px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-white shadow-sm transition">
+                    <ImagePlus className="w-3.5 h-3.5" />
+                    {selected.imageUrl ? "Change" : "Upload"} Image
+                    <input
+                      ref={detailFileRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      onChange={e => { if (e.target.files?.[0]) updateDetailImage(e.target.files[0]); }}
+                    />
+                  </label>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 mb-4">
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[selected.status]}`}>{selected.status}</span>
                 <span className="text-xs border border-primary/20 text-primary px-1.5 py-0.5 rounded-full">{selected.category}</span>
@@ -235,7 +298,6 @@ export default function OfficialAssetsPage() {
                   { label: "Acquisition Date", value: new Date(selected.acquisitionDate).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" }) },
                   { label: "Acquisition Cost", value: `₱${selected.acquisitionCost.toLocaleString()}` },
                   ...(selected.serialNumber ? [{ label: "Serial Number", value: selected.serialNumber }] : []),
-                  ...(selected.warranty ? [{ label: "Warranty Until", value: new Date(selected.warranty).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" }) }] : []),
                 ].map((item, i) => (
                   <div key={i} className="p-3 bg-muted/50 rounded-lg">
                     <p className="text-xs text-muted-foreground">{item.label}</p>
@@ -265,6 +327,36 @@ export default function OfficialAssetsPage() {
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Image Upload */}
+                <div>
+                  <Label>Asset Image (PNG/JPG)</Label>
+                  <div className="mt-1">
+                    {form.imageUrl ? (
+                      <div className="relative w-full h-32 rounded-lg overflow-hidden border border-border/50 mb-2">
+                        <img src={form.imageUrl} alt="Asset" className="w-full h-full object-cover" />
+                        <button type="button" onClick={() => setForm(p => ({ ...p, imageUrl: "" }))} className="absolute top-1 right-1 p-1 rounded-full bg-white/80 text-gray-600 hover:bg-white">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : null}
+                    <label className="flex items-center gap-2 w-full border-2 border-dashed border-border rounded-lg p-3 cursor-pointer hover:bg-muted/30 transition text-sm text-muted-foreground">
+                      <ImagePlus className="w-4 h-4 shrink-0" />
+                      {form.imageUrl ? "Change image" : "Upload asset image (PNG, JPG)"}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        onChange={e => {
+                          if (e.target.files?.[0]) {
+                            handleImageFile(e.target.files[0], url => setForm(p => ({ ...p, imageUrl: url })));
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 <div><Label>Asset Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="mt-1" required /></div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -327,9 +419,7 @@ export default function OfficialAssetsPage() {
                 onClick={() => setSelected(asset)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                    <Package className="w-5 h-5 text-muted-foreground" />
-                  </div>
+                  <AssetThumbnail imageUrl={asset.imageUrl} name={asset.name} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">{asset.name}</p>
                     <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground flex-wrap">
@@ -345,10 +435,17 @@ export default function OfficialAssetsPage() {
                       <button
                         onClick={e => { e.stopPropagation(); openEdit(asset); }}
                         className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition"
+                        title="Edit"
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
-                      <Eye className="w-4 h-4 text-muted-foreground mt-1" />
+                      <button
+                        onClick={e => { e.stopPropagation(); handleDelete(asset.id); }}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 </div>

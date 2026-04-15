@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { mockOrdinances } from "@/lib/mock-data";
-import { BookOpen, Plus, X, Search, Eye, Sparkles } from "lucide-react";
+import { BookOpen, Plus, X, Search, Printer, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type OrdinanceType = "Ordinance" | "Resolution";
@@ -26,6 +26,164 @@ interface Ordinance {
   fullText: string;
 }
 
+function generateOrdinanceTemplate(type: OrdinanceType, number: string, title: string, author: string, dateEnacted: string): string {
+  const date = dateEnacted ? new Date(dateEnacted).toLocaleDateString("en-PH", { day: "numeric", month: "long", year: "numeric" }) : "[Date]";
+  return `BARANGAY ${type.toUpperCase()} NO. ${number || "[Year-Number]"}
+
+AN ${type.toUpperCase()} ENTITLED:
+"An ${type} ${title || "[Title of the " + type + "]"}"
+
+---
+
+BE IT ORDAINED by the Sangguniang Barangay of Barangay Santiago, that:
+
+---
+
+SECTION 1. TITLE
+
+This ${type} shall be known as the "${title || "[Short Title of the " + type + "]"}".
+
+---
+
+SECTION 2. PURPOSE
+
+This ${type} is enacted to [state the purpose or objective].
+
+---
+
+SECTION 3. COVERAGE
+
+This ${type} shall apply to [who or what is covered].
+
+---
+
+SECTION 4. DEFINITION OF TERMS
+
+For purposes of this ${type}, the following terms are defined as:
+a. [Term 1] – [Definition]
+b. [Term 2] – [Definition]
+
+---
+
+SECTION 5. PROHIBITED ACTS / REGULATIONS
+
+The following acts are hereby prohibited:
+a. [Act 1]
+b. [Act 2]
+
+---
+
+SECTION 6. PENALTIES
+
+Any person found violating this ${type} shall be penalized as follows:
+
+* First Offense: [Penalty]
+* Second Offense: [Penalty]
+* Third Offense: [Penalty]
+
+---
+
+SECTION 7. IMPLEMENTING BODY
+
+The Barangay Officials, led by the Punong Barangay, shall implement this ${type}.
+
+---
+
+SECTION 8. SEPARABILITY CLAUSE
+
+If any provision of this ${type} is declared invalid, the remaining provisions shall not be affected.
+
+---
+
+SECTION 9. REPEALING CLAUSE
+
+All ordinances or parts thereof inconsistent with this ${type} are hereby repealed or modified accordingly.
+
+---
+
+SECTION 10. EFFECTIVITY
+
+This ${type} shall take effect upon approval and posting in conspicuous places in the barangay.
+
+---
+
+ENACTED this ${date} at Barangay Santiago.
+
+---
+
+Certified Correct:
+[Barangay Secretary Name]
+Barangay Secretary
+
+---
+
+Approved by:
+${author || "HON. ROLANDO C. BORJA"}
+Punong Barangay
+
+---
+
+Barangay Councilors:
+* [Name]
+* [Name]
+* [Name]`;
+}
+
+function OrdinanceDocument({ ord, onClose, onEdit, onDelete }: {
+  ord: Ordinance;
+  onClose: () => void;
+  onEdit: (ord: Ordinance) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
+      <Card className="w-full max-w-3xl shadow-2xl my-4 bg-white">
+        {/* Toolbar */}
+        <div className="flex items-center justify-between px-6 py-4 border-b print:hidden">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-primary/30 text-primary">{ord.type}</Badge>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ord.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{ord.status}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => window.print()}>
+              <Printer className="w-4 h-4" /> Print
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5 border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => { onClose(); onEdit(ord); }}>
+              <Pencil className="w-4 h-4" /> Edit
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5 border-red-300 text-red-700 hover:bg-red-50" onClick={() => { onDelete(ord.id); onClose(); }}>
+              <Trash2 className="w-4 h-4" /> Delete
+            </Button>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted ml-1">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* White clean document */}
+        <div className="p-8 sm:p-12 bg-white" id="print-area">
+          <div className="text-center mb-8">
+            <p className="text-sm font-semibold text-gray-700">Republic of the Philippines</p>
+            <p className="text-sm text-gray-600">Province of Zambales · Municipality of San Antonio</p>
+            <p className="text-base font-bold text-gray-900 mt-1">BARANGAY SANTIAGO SAZ</p>
+            <div className="border-b-2 border-gray-800 mt-4 mb-6" />
+            <p className="text-xs font-mono text-gray-500 mb-1">{ord.number}</p>
+            <h1 className="text-lg font-bold text-gray-900 uppercase leading-tight">{ord.title}</h1>
+            <p className="text-xs text-gray-500 mt-2">
+              Enacted: {new Date(ord.dateEnacted).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" })} · Author: {ord.author}
+            </p>
+          </div>
+
+          <div className="prose prose-sm max-w-none">
+            <p className="text-sm text-gray-600 italic mb-6 border-l-4 border-primary/30 pl-4">{ord.summary}</p>
+            <pre className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">{ord.fullText}</pre>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function OfficialOrdinancesPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
@@ -33,8 +191,8 @@ export default function OfficialOrdinancesPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Ordinance | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<"all" | OrdinanceType>("all");
-  const [aiLoading, setAiLoading] = useState(false);
 
   const filtered = ordinances.filter(o => {
     const m = o.title.toLowerCase().includes(search.toLowerCase())
@@ -49,53 +207,69 @@ export default function OfficialOrdinancesPage() {
     dateEnacted: "", author: "", summary: "", fullText: "",
   });
 
-  const handleAiDraft = async () => {
-    if (!form.title.trim()) {
-      toast({ title: "Add a title first", variant: "destructive" });
-      return;
-    }
-    setAiLoading(true);
-    await new Promise(r => setTimeout(r, 2000));
-    setAiLoading(false);
-    const draft = `WHEREAS, it is the duty of the Barangay Council to promote the general welfare of its constituents;
+  const openCreate = () => {
+    setForm({ number: "", title: "", type: "Ordinance", dateEnacted: "", author: "", summary: "", fullText: "" });
+    setEditingId(null);
+    setShowForm(true);
+  };
 
-WHEREAS, there is a need to address ${form.title.toLowerCase()};
+  const openEdit = (ord: Ordinance) => {
+    setForm({
+      number: ord.number,
+      title: ord.title,
+      type: ord.type,
+      dateEnacted: ord.dateEnacted,
+      author: ord.author,
+      summary: ord.summary,
+      fullText: ord.fullText,
+    });
+    setEditingId(ord.id);
+    setShowForm(true);
+  };
 
-NOW THEREFORE, BE IT ORDAINED/RESOLVED, as it is hereby ordained/resolved by the Sangguniang Barangay of Santiago, as follows:
+  const handleDelete = (id: string) => {
+    setOrdinances(prev => prev.filter(o => o.id !== id));
+    toast({ title: "Ordinance Deleted", description: "The record has been removed." });
+  };
 
-Section 1. Title. This ${form.type} shall be known as "${form.title}."
-
-Section 2. Declaration of Policy. The Barangay Santiago hereby declares its policy to uphold the rights and welfare of all residents in accordance with this ${form.type}.
-
-Section 3. Scope and Coverage. This ${form.type} shall apply to all residents of Barangay Santiago, San Antonio, Zambales.
-
-Section 4. Implementing Rules. The Barangay Captain, in coordination with the Barangay Council, shall issue the necessary rules and regulations to implement this ${form.type}.
-
-Section 5. Penalties. Violations of this ${form.type} shall be subject to penalties as prescribed by applicable laws and regulations.
-
-Section 6. Separability Clause. If any provision of this ${form.type} is declared invalid or unconstitutional, the other provisions not affected thereby shall remain valid.
-
-Section 7. Effectivity. This ${form.type} shall take effect upon approval.`;
-    setForm(p => ({ ...p, fullText: draft, summary: `This ${form.type} addresses ${form.title.toLowerCase()} within Barangay Santiago.` }));
-    toast({ title: "Draft Generated", description: "AI has drafted the ordinance text." });
+  const handleUseTemplate = () => {
+    const tpl = generateOrdinanceTemplate(form.type, form.number, form.title, form.author, form.dateEnacted);
+    setForm(p => ({ ...p, fullText: tpl, summary: p.summary || `This ${p.type} addresses ${p.title.toLowerCase()} within Barangay Santiago.` }));
+    toast({ title: "Template Applied", description: "Standard ordinance template has been loaded." });
   };
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    const newOrd: Ordinance = {
-      id: `ord-${Date.now()}`,
-      number: form.number,
-      title: form.title.toUpperCase(),
-      type: form.type,
-      dateEnacted: form.dateEnacted,
-      author: form.author,
-      status: "Active",
-      summary: form.summary,
-      fullText: form.fullText,
-    };
-    setOrdinances(prev => [newOrd, ...prev]);
+    if (editingId) {
+      setOrdinances(prev => prev.map(o => o.id === editingId ? {
+        ...o,
+        number: form.number,
+        title: form.title.toUpperCase(),
+        type: form.type,
+        dateEnacted: form.dateEnacted,
+        author: form.author,
+        status: o.status,
+        summary: form.summary,
+        fullText: form.fullText,
+      } : o));
+      toast({ title: "Ordinance Updated", description: `${form.number} has been updated.` });
+    } else {
+      const newOrd: Ordinance = {
+        id: `ord-${Date.now()}`,
+        number: form.number,
+        title: form.title.toUpperCase(),
+        type: form.type,
+        dateEnacted: form.dateEnacted,
+        author: form.author,
+        status: "Active",
+        summary: form.summary,
+        fullText: form.fullText,
+      };
+      setOrdinances(prev => [newOrd, ...prev]);
+      toast({ title: "Ordinance Added", description: `${form.number} has been recorded.` });
+    }
     setShowForm(false);
-    toast({ title: "Ordinance Added", description: `${form.number} has been recorded.` });
+    setEditingId(null);
     setForm({ number: "", title: "", type: "Ordinance", dateEnacted: "", author: "", summary: "", fullText: "" });
   };
 
@@ -106,7 +280,7 @@ Section 7. Effectivity. This ${form.type} shall take effect upon approval.`;
         description={`${ordinances.filter(o => o.status === "Active").length} active`}
         onMenuClick={toggle}
         actions={
-          <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" onClick={() => setShowForm(true)} data-testid="button-add-ordinance">
+          <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2" onClick={openCreate} data-testid="button-add-ordinance">
             <Plus className="w-4 h-4" /> Add Ordinance
           </Button>
         }
@@ -131,41 +305,23 @@ Section 7. Effectivity. This ${form.type} shall take effect upon approval.`;
           </div>
         </div>
 
-        {/* Detail Modal */}
+        {/* Document viewer */}
         {selected && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-            <Card className="w-full max-w-2xl p-6 shadow-2xl my-4 animate-fadeUp">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1 pr-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="outline" className="border-primary/30 text-primary">{selected.type}</Badge>
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{selected.status}</span>
-                  </div>
-                  <p className="text-xs font-mono text-muted-foreground mb-1">{selected.number}</p>
-                  <h2 className="text-base font-bold text-foreground leading-tight">{selected.title}</h2>
-                </div>
-                <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted shrink-0"><X className="w-5 h-5" /></button>
-              </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-5 pb-4 border-b border-border">
-                <span>Enacted: {new Date(selected.dateEnacted).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}</span>
-                <span>Author: {selected.author}</span>
-              </div>
-              <p className="text-sm text-muted-foreground italic mb-4">{selected.summary}</p>
-              <div className="p-4 bg-muted/40 rounded-lg">
-                <p className="text-xs font-medium text-muted-foreground mb-2">Full Text</p>
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-mono text-xs">{selected.fullText}</p>
-              </div>
-            </Card>
-          </div>
+          <OrdinanceDocument
+            ord={selected}
+            onClose={() => setSelected(null)}
+            onEdit={openEdit}
+            onDelete={handleDelete}
+          />
         )}
 
-        {/* Add Form */}
+        {/* Add/Edit Form */}
         {showForm && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
             <Card className="w-full max-w-lg p-6 shadow-2xl my-4 animate-fadeUp">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="font-bold text-foreground">Add Ordinance/Resolution</h2>
-                <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted"><X className="w-5 h-5" /></button>
+                <h2 className="font-bold text-foreground">{editingId ? "Edit Ordinance/Resolution" : "Add Ordinance/Resolution"}</h2>
+                <button onClick={() => { setShowForm(false); setEditingId(null); }} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleAdd} className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
@@ -192,15 +348,15 @@ Section 7. Effectivity. This ${form.type} shall take effect upon approval.`;
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <Label>Full Text</Label>
-                    <Button type="button" size="sm" variant="outline" onClick={handleAiDraft} disabled={aiLoading} className="h-7 text-xs gap-1 border-purple-300 text-purple-700 hover:bg-purple-50" data-testid="button-ai-draft">
-                      <Sparkles className="w-3 h-3" /> {aiLoading ? "Drafting..." : "AI Draft"}
+                    <Button type="button" size="sm" variant="outline" onClick={handleUseTemplate} className="h-7 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/5">
+                      Use Template
                     </Button>
                   </div>
                   <Textarea value={form.fullText} onChange={e => setForm(p => ({ ...p, fullText: e.target.value }))} className="min-h-[200px] font-mono text-xs" placeholder="Full text of the ordinance or resolution..." />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">Cancel</Button>
-                  <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" data-testid="button-submit-ordinance">Add</Button>
+                  <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }} className="flex-1">Cancel</Button>
+                  <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" data-testid="button-submit-ordinance">{editingId ? "Update" : "Add"}</Button>
                 </div>
               </form>
             </Card>
@@ -223,12 +379,27 @@ Section 7. Effectivity. This ${form.type} shall take effect upon approval.`;
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-xs font-mono text-muted-foreground">{ord.number}</span>
                     <Badge variant="outline" className="text-xs border-primary/20 text-primary">{ord.type}</Badge>
-                    <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{ord.status}</span>
+                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${ord.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{ord.status}</span>
                   </div>
                   <p className="text-sm font-semibold text-foreground line-clamp-2">{ord.title}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{ord.author} · {new Date(ord.dateEnacted).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</p>
                 </div>
-                <Eye className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
+                <div className="flex items-center gap-1 shrink-0 mt-1">
+                  <button
+                    onClick={e => { e.stopPropagation(); openEdit(ord); setShowForm(true); setSelected(null); }}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition"
+                    title="Edit"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); handleDelete(ord.id); }}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </Card>
           ))}

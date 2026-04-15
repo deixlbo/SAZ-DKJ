@@ -10,11 +10,18 @@ import { MiniCalendar } from "@/components/portal/mini-calendar";
 import { mockDocumentRequests } from "@/lib/mock-data";
 import {
   FileText, Search, CheckCircle2, XCircle, Clock, AlertCircle, Eye,
-  Sparkles, Printer, CalendarDays, List, FileQuestion, Settings, Plus, Trash2, Bell
+  Printer, CalendarDays, List, FileQuestion, Settings, Plus, Trash2, Bell, Upload, File
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type DocStatus = "approved" | "pending" | "processing" | "rejected" | "needs-docs";
+
+interface UploadedFile {
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+}
 
 interface DocRequest {
   id: string;
@@ -26,6 +33,7 @@ interface DocRequest {
   date: string;
   address: string;
   notes: string;
+  uploadedFiles?: UploadedFile[];
 }
 
 interface DocType {
@@ -56,12 +64,48 @@ const statusIcons: Record<DocStatus, React.ReactNode> = {
   "needs-docs": <FileQuestion className="w-3.5 h-3.5" />,
 };
 
+function SealImage({ className = "" }: { className?: string }) {
+  return (
+    <div className={`rounded-full overflow-hidden border-2 border-gray-300 bg-white flex items-center justify-center ${className}`}>
+      <img
+        src="/santiago.jpg"
+        alt="Barangay Santiago Seal"
+        className="w-full h-full object-cover"
+        onError={e => {
+          const t = e.currentTarget as HTMLImageElement;
+          t.style.display = "none";
+          const p = t.parentElement;
+          if (p) p.innerHTML = `<span style="font-size:8px;font-weight:700;text-align:center;color:#1a6b3c;padding:2px;">BRGY<br/>SGO</span>`;
+        }}
+      />
+    </div>
+  );
+}
+
+function SazImage({ className = "" }: { className?: string }) {
+  return (
+    <div className={`rounded-full overflow-hidden border-2 border-gray-300 bg-white flex items-center justify-center ${className}`}>
+      <img
+        src="/saz.jpg"
+        alt="Saz Seal"
+        className="w-full h-full object-cover"
+        onError={e => {
+          const t = e.currentTarget as HTMLImageElement;
+          t.style.display = "none";
+          const p = t.parentElement;
+          if (p) p.innerHTML = `<span style="font-size:8px;font-weight:700;text-align:center;color:#1a3c6b;padding:2px;">SAZ<br/>SAN<br/>ANT</span>`;
+        }}
+      />
+    </div>
+  );
+}
+
 function PrintDocument({ doc, onClose }: { doc: DocRequest; onClose: () => void }) {
   const today = new Date().toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" });
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
-      <Card className="w-full max-w-2xl p-8 shadow-2xl my-4">
-        <div className="flex justify-between items-start mb-6">
+      <Card className="w-full max-w-2xl p-8 shadow-2xl my-4 bg-white">
+        <div className="flex justify-between items-start mb-6 print:hidden">
           <h2 className="font-bold text-foreground">Document Preview</h2>
           <div className="flex gap-2">
             <Button size="sm" onClick={() => window.print()} className="gap-1.5 bg-primary">
@@ -70,13 +114,20 @@ function PrintDocument({ doc, onClose }: { doc: DocRequest; onClose: () => void 
             <Button size="sm" variant="outline" onClick={onClose}>Close</Button>
           </div>
         </div>
-        <div className="border border-border rounded-lg p-8 text-sm print:border-0" id="print-area">
+        <div className="border border-border rounded-lg p-8 text-sm print:border-0 bg-white" id="print-area">
+          {/* Header with seals */}
+          <div className="flex items-center justify-between mb-4">
+            <SealImage className="w-20 h-20" />
+            <div className="text-center flex-1 px-4">
+              <p className="text-xs text-gray-600">Republic of the Philippines</p>
+              <p className="text-xs text-gray-600">Province of Zambales · Municipality of San Antonio</p>
+              <h1 className="font-bold text-base mt-1 uppercase">BARANGAY SANTIAGO SAZ</h1>
+              <p className="text-xs text-gray-600">Office of the Punong Barangay</p>
+            </div>
+            <SazImage className="w-20 h-20" />
+          </div>
+          <div className="border-b-2 border-gray-800 mb-4" />
           <div className="text-center mb-6">
-            <p className="text-xs text-muted-foreground">Republic of the Philippines</p>
-            <p className="text-xs text-muted-foreground">Province of Zambales · Municipality of San Antonio</p>
-            <h1 className="font-bold text-lg mt-2">BARANGAY SANTIAGO SAZ</h1>
-            <p className="text-xs text-muted-foreground">Office of the Punong Barangay</p>
-            <div className="border-b-2 border-foreground mt-4 mb-4" />
             <h2 className="font-bold text-base uppercase tracking-wide">{doc.documentType}</h2>
           </div>
           <p className="text-muted-foreground text-xs mb-6">Date: <strong className="text-foreground">{today}</strong></p>
@@ -113,7 +164,6 @@ export default function OfficialDocumentsPage() {
   const [filter, setFilter] = useState<"all" | DocStatus>("all");
   const [selected, setSelected] = useState<DocRequest | null>(null);
   const [printDoc, setPrintDoc] = useState<DocRequest | null>(null);
-  const [aiLoading, setAiLoading] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "calendar" | "settings">("list");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [needsDocsNote, setNeedsDocsNote] = useState("");
@@ -140,16 +190,6 @@ export default function OfficialDocumentsPage() {
     setSelected(prev => prev?.id === id ? { ...prev, status, notes } : prev);
     const label = status === "needs-docs" ? "Needs More Documents" : status.charAt(0).toUpperCase() + status.slice(1);
     toast({ title: `Request ${label}`, description: `Resident has been notified via system.` });
-  };
-
-  const handleAiReview = async (doc: DocRequest) => {
-    setAiLoading(doc.id);
-    await new Promise(r => setTimeout(r, 1500));
-    setAiLoading(null);
-    toast({
-      title: "AI Review Complete",
-      description: `${doc.documentType} for ${doc.residentName} — Resident verified. All requirements met. Recommended: Approve.`,
-    });
   };
 
   const handleNeedsMoreDocs = () => {
@@ -182,6 +222,23 @@ export default function OfficialDocumentsPage() {
 
   const removeDocType = (name: string) => {
     setDocTypes(prev => prev.filter(dt => dt.name !== name));
+  };
+
+  const handleFileUpload = (docId: string, files: FileList | null) => {
+    if (!files) return;
+    const uploaded: UploadedFile[] = Array.from(files).map(f => ({
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      url: URL.createObjectURL(f),
+    }));
+    setDocs(prev => prev.map(d => d.id === docId
+      ? { ...d, uploadedFiles: [...(d.uploadedFiles ?? []), ...uploaded] }
+      : d));
+    if (selected?.id === docId) {
+      setSelected(prev => prev ? { ...prev, uploadedFiles: [...(prev.uploadedFiles ?? []), ...uploaded] } : prev);
+    }
+    toast({ title: "Files Uploaded", description: `${uploaded.length} file(s) attached to the request.` });
   };
 
   return (
@@ -392,6 +449,9 @@ export default function OfficialDocumentsPage() {
                             <Printer className="w-4 h-4" />
                           </button>
                         )}
+                        {(doc.uploadedFiles?.length ?? 0) > 0 && (
+                          <span className="text-xs text-blue-600 font-medium">{doc.uploadedFiles!.length} file(s)</span>
+                        )}
                         <Eye className="w-4 h-4 text-muted-foreground" />
                       </div>
                     </div>
@@ -440,19 +500,50 @@ export default function OfficialDocumentsPage() {
               )}
             </div>
 
-            {/* Requirements checklist */}
+            {/* Required Documents with uploaded files */}
             {(() => {
               const dt = docTypes.find(d => d.name === selected.documentType);
               return dt ? (
                 <div className="mb-5 p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs font-medium text-muted-foreground mb-2">Required Documents</p>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1 mb-3">
                     {dt.requirements.map(r => (
                       <li key={r} className="flex items-center gap-2 text-sm text-foreground">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> {r}
                       </li>
                     ))}
                   </ul>
+
+                  {/* Uploaded files by resident */}
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-medium text-muted-foreground">Uploaded by Resident</p>
+                      <label className="flex items-center gap-1 text-xs text-primary cursor-pointer hover:text-primary/80 transition">
+                        <Upload className="w-3.5 h-3.5" />
+                        Upload File
+                        <input
+                          type="file"
+                          className="hidden"
+                          multiple
+                          accept="image/*,.pdf,.doc,.docx"
+                          onChange={e => handleFileUpload(selected.id, e.target.files)}
+                        />
+                      </label>
+                    </div>
+                    {(selected.uploadedFiles?.length ?? 0) === 0 ? (
+                      <p className="text-xs text-muted-foreground italic">No files uploaded yet</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {selected.uploadedFiles!.map((f, i) => (
+                          <div key={i} className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-100 rounded-md">
+                            <File className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                            <a href={f.url} target="_blank" rel="noreferrer" className="text-xs text-blue-700 truncate flex-1 hover:underline">{f.name}</a>
+                            <span className="text-xs text-muted-foreground shrink-0">{(f.size / 1024).toFixed(0)} KB</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : null;
             })()}
@@ -477,33 +568,18 @@ export default function OfficialDocumentsPage() {
             )}
 
             <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleAiReview(selected)}
-                disabled={aiLoading === selected.id}
-                className="gap-1.5 border-purple-300 text-purple-700 hover:bg-purple-50"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                {aiLoading === selected.id ? "Reviewing..." : "AI Review"}
-              </Button>
-              <Button size="sm" onClick={() => updateStatus(selected.id, "processing")} variant="outline" className="border-blue-300 text-blue-700">
-                Mark Processing
-              </Button>
-              <Button size="sm" onClick={() => { updateStatus(selected.id, "approved"); setSelected(null); }} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Approve
-              </Button>
-              <Button size="sm" onClick={() => { updateStatus(selected.id, "rejected", "Requirements incomplete."); setSelected(null); }} variant="destructive" className="gap-1">
-                <XCircle className="w-3.5 h-3.5" /> Reject
-              </Button>
-              <Button size="sm" onClick={() => setShowNeedsDocsForm(true)} variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50 gap-1">
+              <Button size="sm" variant="outline" onClick={() => setShowNeedsDocsForm(true)} className="gap-1.5 border-purple-300 text-purple-700 hover:bg-purple-50">
                 <FileQuestion className="w-3.5 h-3.5" /> Needs Docs
               </Button>
-              {selected.status === "approved" && (
-                <Button size="sm" onClick={() => setPrintDoc(selected)} className="gap-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-300">
-                  <Printer className="w-3.5 h-3.5" /> Print
-                </Button>
-              )}
+              <Button size="sm" variant="outline" onClick={() => updateStatus(selected.id, "processing")} className="gap-1 border-blue-300 text-blue-700">
+                <AlertCircle className="w-3.5 h-3.5" /> Processing
+              </Button>
+              <Button size="sm" onClick={() => { updateStatus(selected.id, "approved"); setPrintDoc(selected); setSelected(null); }} className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Approve & Print
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => updateStatus(selected.id, "rejected")} className="gap-1 border-red-300 text-red-700 hover:bg-red-50">
+                <XCircle className="w-3.5 h-3.5" /> Reject
+              </Button>
             </div>
           </Card>
         </div>

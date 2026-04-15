@@ -4,10 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { useAuth } from "@/lib/auth-context";
-import { mockDocumentRequests, mockBlotterCases, mockResidents, mockAnnouncements, mockProjects, mockAssets } from "@/lib/mock-data";
+import { mockDocumentRequests, mockBlotterCases, mockResidents, mockAnnouncements, mockProjects } from "@/lib/mock-data";
 import {
-  Users, FileText, ClipboardList, Megaphone, FolderKanban, Package,
-  CheckCircle2, Clock, AlertCircle, ArrowRight, TrendingUp, Activity
+  Users, FileText, ClipboardList, FolderKanban,
+  CheckCircle2, ArrowRight
 } from "lucide-react";
 
 export default function OfficialDashboard() {
@@ -100,7 +100,7 @@ export default function OfficialDashboard() {
                           <p className="text-xs text-muted-foreground">{doc.residentName}</p>
                         </div>
                       </div>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[doc.status]}`}>{doc.status}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[doc.status as keyof typeof statusColor]}`}>{doc.status}</span>
                     </div>
                   ))}
                 </div>
@@ -123,7 +123,7 @@ export default function OfficialDashboard() {
                 <Card key={b.id} className="p-3 border-border/50">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-xs font-mono text-muted-foreground">{b.id}</span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded capitalize ${blotterStatusColor[b.status]}`}>{b.status}</span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded capitalize ${blotterStatusColor[b.status as keyof typeof blotterStatusColor]}`}>{b.status}</span>
                   </div>
                   <p className="text-sm font-medium text-foreground">{b.incidentType}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{b.location}</p>
@@ -133,7 +133,7 @@ export default function OfficialDashboard() {
           </section>
         </div>
 
-        {/* Recent Announcements + Quick Info */}
+        {/* Recent Announcements */}
         <div className="grid lg:grid-cols-2 gap-5">
           <section>
             <div className="flex items-center justify-between mb-3">
@@ -156,25 +156,6 @@ export default function OfficialDashboard() {
                 </Card>
               ))}
             </div>
-          </section>
-
-          <section>
-            <h2 className="font-semibold text-foreground mb-3">Quick Summary</h2>
-            <Card className="p-4 border-primary/15 bg-primary/5">
-              <div className="space-y-3">
-                {[
-                  { icon: <TrendingUp className="w-4 h-4 text-emerald-600" />, label: "Approved Documents (This Month)", value: 28 },
-                  { icon: <Activity className="w-4 h-4 text-blue-600" />, label: "Ongoing Projects", value: mockProjects.filter(p => p.status === "ongoing").length },
-                  { icon: <Package className="w-4 h-4 text-purple-600" />, label: "Registered Assets", value: mockAssets.length },
-                  { icon: <Users className="w-4 h-4 text-amber-600" />, label: "Registered Businesses", value: 47 },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-sm text-foreground">{item.icon}{item.label}</span>
-                    <span className="font-bold text-foreground">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </section>
         </div>
       </div>

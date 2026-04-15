@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Megaphone, ClipboardList, Users, FolderKanban,
-  Package, BookOpen, Building2, User, LogOut, X, Shield, Home
+  Package, BookOpen, Building2, User, LogOut, X, Home
 } from "lucide-react";
 
 interface SidebarProps {
@@ -39,12 +39,41 @@ const officialNavItems: NavItem[] = [
   { label: "My Profile", href: "/official/profile", icon: User },
 ];
 
+function SantiagoSeal({ size = 40 }: { size?: number }) {
+  return (
+    <div
+      className="rounded-full overflow-hidden border-2 border-sidebar-border bg-white flex items-center justify-center shrink-0"
+      style={{ width: size, height: size }}
+    >
+      <img
+        src="/santiago.jpg"
+        alt="Barangay Santiago"
+        className="w-full h-full object-cover"
+        onError={e => {
+          const target = e.currentTarget as HTMLImageElement;
+          target.style.display = "none";
+          const parent = target.parentElement;
+          if (parent) {
+            parent.innerHTML = `<span style="font-size:${Math.round(size * 0.3)}px;font-weight:700;color:#1a6b3c;">BSG</span>`;
+          }
+        }}
+      />
+    </div>
+  );
+}
+
 export function Sidebar({ open, onClose }: SidebarProps) {
   const { userData, logout } = useAuth();
   const [location] = useLocation();
 
   const navItems = userData?.role === "official" ? officialNavItems : residentNavItems;
   const isOfficial = userData?.role === "official";
+
+  const nameInitial = (() => {
+    const name = userData?.fullName ?? "U";
+    const stripped = name.replace(/^(Hon\.|Dr\.|Atty\.|Engr\.|Mr\.|Mrs\.|Ms\.)\s*/i, "");
+    return stripped.charAt(0).toUpperCase();
+  })();
 
   return (
     <>
@@ -65,12 +94,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       >
         <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              {isOfficial
-                ? <Shield className="w-5 h-5 text-primary-foreground" />
-                : <Home className="w-5 h-5 text-primary-foreground" />
-              }
-            </div>
+            {isOfficial
+              ? <SantiagoSeal size={40} />
+              : (
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                  <Home className="w-5 h-5 text-primary-foreground" />
+                </div>
+              )
+            }
             <div>
               <p className="text-sidebar-foreground font-bold text-sm leading-tight">Brgy. Santiago</p>
               <p className="text-sidebar-foreground/60 text-xs">
@@ -89,7 +120,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="px-4 py-3 border-b border-sidebar-border/50 bg-sidebar-accent/30">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-              {userData?.fullName?.charAt(0) ?? "U"}
+              {nameInitial}
             </div>
             <div className="min-w-0">
               <p className="text-sidebar-foreground font-semibold text-sm truncate">{userData?.fullName ?? "User"}</p>
