@@ -33,8 +33,8 @@ export default function OfficialLoginPage() {
         </Link>
         <Card className="p-8 border-sidebar/20 shadow-xl">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-sidebar/10 border-4 border-sidebar/20 flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-9 h-9 text-sidebar" />
+            <div className="w-20 h-20 rounded-full border-4 border-sidebar/20 overflow-hidden mx-auto mb-4">
+              <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Official Portal</h1>
             <p className="text-muted-foreground text-sm mt-1">Sign in to the administrative panel</p>

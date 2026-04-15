@@ -33,8 +33,8 @@ export default function ResidentLoginPage() {
         </Link>
         <Card className="p-8 border-primary/20 shadow-xl">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border-4 border-primary/20 flex items-center justify-center mx-auto mb-4">
-              <Users className="w-9 h-9 text-primary" />
+            <div className="w-20 h-20 rounded-full border-4 border-primary/20 overflow-hidden mx-auto mb-4">
+              <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Barangay Santiago</h1>
             <p className="text-muted-foreground text-sm mt-1">Resident Portal</p>

@@ -37,8 +37,8 @@ export default function LandingPage() {
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
-              <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
-                <Shield className="w-4.5 h-4.5 text-sidebar-foreground" />
+              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-primary/30 flex items-center justify-center">
+                <img src="/santiago.jpg" alt="Brgy. Santiago" className="w-full h-full object-cover" />
               </div>
               <span className="text-sidebar-foreground font-bold text-base hidden sm:block">
                 Barangay Santiago Saz
@@ -137,8 +137,8 @@ export default function LandingPage() {
         <div className="relative z-10 max-w-5xl mx-auto px-4 py-20 text-center">
           <div className="animate-fadeUp">
             <div className="flex items-center justify-center mb-6">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-primary/20 border-4 border-primary/40 flex items-center justify-center shadow-2xl">
-                <Building2 className="w-14 h-14 sm:w-20 sm:h-20 text-sidebar-foreground/80" />
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-primary/40 shadow-2xl overflow-hidden">
+                <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
               </div>
             </div>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/30 mb-4">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, Platform
+  ScrollView, ActivityIndicator, Platform, Image
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -68,6 +68,7 @@ export default function LoginScreen() {
       justifyContent: "center",
       alignItems: "center",
       marginBottom: 16,
+      overflow: "hidden",
     },
     logoTitle: {
       color: colors.sidebarForeground,
@@ -195,9 +196,11 @@ export default function LoginScreen() {
     <View style={s.container}>
       <ScrollView style={s.scroll} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <View style={s.logoWrap}>
-          <View style={s.logoCircle}>
-            <Ionicons name="business" size={40} color={colors.sidebarForeground} />
-          </View>
+          <Image
+            source={require("@/assets/images/santiago.jpg")}
+            style={s.logoCircle}
+            resizeMode="cover"
+          />
           <Text style={s.logoTitle}>Barangay Santiago Saz</Text>
           <Text style={s.logoSub}>San Antonio, Zambales</Text>
         </View>
