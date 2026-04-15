@@ -20,6 +20,7 @@ import ResidentAnnouncementsPage from "@/pages/resident/announcements";
 import ResidentBlotterPage from "@/pages/resident/blotter";
 import ResidentProgramsPage from "@/pages/resident/programs";
 import ResidentProfilePage from "@/pages/resident/profile";
+import ResidentOrdinancesPage from "@/pages/resident/ordinances";
 
 // Official portal pages
 import OfficialDashboard from "@/pages/official/dashboard";
@@ -89,6 +90,11 @@ function Router() {
       <Route path="/resident/profile">
         <RequireAuth role="resident">
           <PortalLayout><ResidentProfilePage /></PortalLayout>
+        </RequireAuth>
+      </Route>
+      <Route path="/resident/ordinances">
+        <RequireAuth role="resident">
+          <PortalLayout><ResidentOrdinancesPage /></PortalLayout>
         </RequireAuth>
       </Route>
 
