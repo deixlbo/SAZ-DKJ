@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { mockOrdinances } from "@/lib/mock-data";
-import { BookOpen, Search, X, Printer } from "lucide-react";
+import { BookOpen, Search, X } from "lucide-react";
 
 type OrdinanceType = "Ordinance" | "Resolution";
 type OrdinanceStatus = "Active" | "Repealed" | "Superseded";
@@ -28,19 +28,14 @@ function OrdinanceDocument({ ord, onClose }: { ord: Ordinance; onClose: () => vo
     <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
       <Card className="w-full max-w-3xl shadow-2xl my-4 bg-white">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b print:hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="border-primary/30 text-primary">{ord.type}</Badge>
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ord.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{ord.status}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => window.print()}>
-              <Printer className="w-4 h-4" /> Print
-            </Button>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted ml-1">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* White clean document */}
@@ -58,7 +53,7 @@ function OrdinanceDocument({ ord, onClose }: { ord: Ordinance; onClose: () => vo
           </div>
 
           <div className="prose prose-sm max-w-none">
-            <p className="text-sm text-gray-600 italic mb-6 border-l-4 border-primary/30 pl-4">{ord.summary}</p>
+            <p className="text-sm text-gray-600 italic mb-6">{ord.summary}</p>
             <pre className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">{ord.fullText}</pre>
           </div>
         </div>

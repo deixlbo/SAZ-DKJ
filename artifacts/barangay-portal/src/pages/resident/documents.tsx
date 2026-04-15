@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { mockDocumentRequests } from "@/lib/mock-data";
 import {
   FileText, CheckCircle2, Clock, AlertCircle, XCircle, X, Upload,
-  ChevronRight, FileQuestion, Bell, Printer
+  ChevronRight, FileQuestion, Bell
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -338,11 +338,6 @@ export default function ResidentDocumentsPage() {
                       <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${statusStyles[doc.status]}`}>
                         {statusIcons[doc.status]} {statusLabel[doc.status]}
                       </span>
-                      {doc.status === "approved" && (
-                        <Button size="sm" variant="outline" className="text-xs h-7 border-emerald-300 text-emerald-700 gap-1">
-                          <Printer className="w-3 h-3" /> Print
-                        </Button>
-                      )}
                       {doc.status === "needs-docs" && (
                         <Button size="sm" variant="outline" className="text-xs h-7 border-purple-300 text-purple-700 gap-1"
                           onClick={() => {

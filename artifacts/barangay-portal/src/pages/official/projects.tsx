@@ -10,7 +10,7 @@ import { MiniCalendar } from "@/components/portal/mini-calendar";
 import { mockProjects } from "@/lib/mock-data";
 import {
   FolderKanban, Plus, X, Users, MapPin, CheckCircle2, Clock,
-  DollarSign, CalendarDays, List, Pencil, Trash2, Printer
+  DollarSign, CalendarDays, List, Pencil, Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -56,128 +56,6 @@ const emptyForm = {
   purpose: "", targetParticipants: "", materialsNeeded: "", expectedOutcome: "",
 };
 
-function ProgramDocument({ proj, onClose }: { proj: Project; onClose: () => void }) {
-  const activities: ProgramActivity[] = proj.activities?.length
-    ? proj.activities
-    : [
-        { time: "___", activity: "Opening Program", personAssigned: "___" },
-        { time: "___", activity: "Activity 1", personAssigned: "___" },
-        { time: "___", activity: "Activity 2", personAssigned: "___" },
-        { time: "___", activity: "Closing Program", personAssigned: "___" },
-      ];
-
-  return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
-      <Card className="w-full max-w-2xl shadow-2xl my-4 bg-white">
-        <div className="flex items-center justify-between px-6 py-4 border-b print:hidden">
-          <h2 className="font-bold text-foreground">Programme Document</h2>
-          <div className="flex gap-2">
-            <Button size="sm" onClick={() => window.print()} className="gap-1.5">
-              <Printer className="w-4 h-4" /> Print
-            </Button>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-        <div className="p-8 sm:p-12 bg-white" id="print-area">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold uppercase tracking-wider text-gray-900">BARANGAY PROGRAMME</h1>
-            <div className="border-b-2 border-gray-800 mt-3 mb-6" />
-          </div>
-
-          <div className="space-y-2 mb-6">
-            <div className="flex gap-4">
-              <span className="font-semibold text-sm w-36 shrink-0">Program Title:</span>
-              <span className="text-sm border-b border-gray-400 flex-1 pb-0.5">{proj.title}</span>
-            </div>
-            <div className="flex gap-4">
-              <span className="font-semibold text-sm w-36 shrink-0">Date:</span>
-              <span className="text-sm border-b border-gray-400 flex-1 pb-0.5">{proj.startDate ? new Date(proj.startDate).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" }) : "___________________________"}</span>
-            </div>
-            <div className="flex gap-4">
-              <span className="font-semibold text-sm w-36 shrink-0">Venue:</span>
-              <span className="text-sm border-b border-gray-400 flex-1 pb-0.5">{proj.location || "___________________________"}</span>
-            </div>
-          </div>
-
-          <hr className="border-gray-300 my-6" />
-
-          <section className="mb-6">
-            <h2 className="font-bold text-base mb-2">1. Purpose</h2>
-            <p className="text-sm text-gray-700 min-h-[60px] border border-gray-200 rounded p-2">
-              {proj.purpose || proj.description || "(Why this program is conducted)"}
-            </p>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="font-bold text-base mb-2">2. Target Participants</h2>
-            <p className="text-sm text-gray-700 min-h-[40px] border border-gray-200 rounded p-2">
-              {proj.targetParticipants || "(e.g., Youth, Residents, Senior Citizens)"}
-            </p>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="font-bold text-base mb-3">3. Program Flow / Activities</h2>
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-3 py-2 text-left w-20">Time</th>
-                  <th className="border border-gray-300 px-3 py-2 text-left">Activity</th>
-                  <th className="border border-gray-300 px-3 py-2 text-left w-40">Person Assigned</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activities.map((a, i) => (
-                  <tr key={i}>
-                    <td className="border border-gray-300 px-3 py-2">{a.time}</td>
-                    <td className="border border-gray-300 px-3 py-2">{a.activity}</td>
-                    <td className="border border-gray-300 px-3 py-2">{a.personAssigned}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="font-bold text-base mb-2">4. Materials Needed</h2>
-            <div className="text-sm text-gray-700 min-h-[40px] border border-gray-200 rounded p-2">
-              {proj.materialsNeeded
-                ? proj.materialsNeeded.split("\n").map((m, i) => <p key={i}>• {m}</p>)
-                : <><p>•</p><p>•</p></>}
-            </div>
-          </section>
-
-          <section className="mb-6">
-            <h2 className="font-bold text-base mb-2">5. Budget (Optional)</h2>
-            <p className="text-sm text-gray-700">₱ {proj.budget > 0 ? proj.budget.toLocaleString() : "___________________________"}</p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="font-bold text-base mb-2">6. Expected Outcome</h2>
-            <p className="text-sm text-gray-700 min-h-[60px] border border-gray-200 rounded p-2">
-              {proj.expectedOutcome || "(What you want to achieve)"}
-            </p>
-          </section>
-
-          <div className="grid grid-cols-2 gap-8 mt-10">
-            <div>
-              <p className="text-sm font-semibold mb-6">Prepared by:</p>
-              <div className="border-b border-gray-500" />
-              <p className="text-xs text-gray-500 mt-1">{proj.leadBy || "Signature over printed name"}</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold mb-6">Approved by:</p>
-              <div className="border-b border-gray-500" />
-              <p className="text-xs text-gray-500 mt-1">HON. ROLANDO C. BORJA / Punong Barangay</p>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
 export default function OfficialProjectsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
@@ -188,7 +66,6 @@ export default function OfficialProjectsPage() {
   const [filter, setFilter] = useState<"all" | ProjectStatus>("all");
   const [view, setView] = useState<"list" | "calendar">("list");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [printProj, setPrintProj] = useState<Project | null>(null);
   const [form, setForm] = useState(emptyForm);
 
   const filtered = filter === "all" ? projects : projects.filter(p => p.status === filter);
@@ -290,8 +167,6 @@ export default function OfficialProjectsPage() {
 
   return (
     <div className="flex-1 flex flex-col">
-      {printProj && <ProgramDocument proj={printProj} onClose={() => setPrintProj(null)} />}
-
       <PortalHeader
         title="Projects & Programs"
         description={`${projects.filter(p => p.status === "ongoing").length} ongoing`}
@@ -416,9 +291,6 @@ export default function OfficialProjectsPage() {
                   <h2 className="text-xl font-bold text-foreground">{selected.title}</h2>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
-                  <Button size="sm" variant="outline" className="gap-1.5 h-8" onClick={() => setPrintProj(selected)}>
-                    <Printer className="w-3.5 h-3.5" /><span className="text-xs">Programme</span>
-                  </Button>
                   <button onClick={() => openEdit(selected)} className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition" title="Edit">
                     <Pencil className="w-4 h-4" />
                   </button>

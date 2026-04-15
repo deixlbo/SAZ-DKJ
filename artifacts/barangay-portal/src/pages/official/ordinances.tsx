@@ -175,7 +175,7 @@ function OrdinanceDocument({ ord, onClose, onEdit, onDelete }: {
           </div>
 
           <div className="prose prose-sm max-w-none">
-            <p className="text-sm text-gray-600 italic mb-6 border-l-4 border-primary/30 pl-4">{ord.summary}</p>
+            <p className="text-sm text-gray-600 italic mb-6">{ord.summary}</p>
             <pre className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">{ord.fullText}</pre>
           </div>
         </div>
