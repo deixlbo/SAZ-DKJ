@@ -22,7 +22,6 @@ const residentNavItems: NavItem[] = [
   { label: "Document Requests", href: "/resident/documents", icon: FileText },
   { label: "Announcements", href: "/resident/announcements", icon: Megaphone },
   { label: "Blotter Report", href: "/resident/blotter", icon: ClipboardList },
-  { label: "Programs", href: "/resident/programs", icon: FolderKanban },
   { label: "Ordinances", href: "/resident/ordinances", icon: BookOpen },
   { label: "My Profile", href: "/resident/profile", icon: User },
 ];
