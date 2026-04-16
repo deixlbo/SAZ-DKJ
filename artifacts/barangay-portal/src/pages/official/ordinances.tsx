@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { mockOrdinances } from "@/lib/mock-data";
-import { BookOpen, Plus, X, Search, Printer, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, Plus, X, Search, Printer, Pencil, Trash2, Eye, Calendar, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type OrdinanceType = "Ordinance" | "Resolution";
@@ -25,6 +24,12 @@ interface Ordinance {
   summary: string;
   fullText: string;
 }
+
+const statusStyle: Record<OrdinanceStatus, string> = {
+  Active: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  Repealed: "bg-gray-100 text-gray-600 border-gray-200",
+  Superseded: "bg-amber-100 text-amber-700 border-amber-200",
+};
 
 function generateOrdinanceTemplate(type: OrdinanceType, number: string, title: string, author: string, dateEnacted: string): string {
   const date = dateEnacted ? new Date(dateEnacted).toLocaleDateString("en-PH", { day: "numeric", month: "long", year: "numeric" }) : "[Date]";
@@ -129,20 +134,28 @@ Barangay Councilors:
 * [Name]`;
 }
 
+function parseDocumentSections(text: string) {
+  return text
+    .split(/\n---\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
 function OrdinanceDocument({ ord, onClose, onEdit, onDelete }: {
   ord: Ordinance;
   onClose: () => void;
   onEdit: (ord: Ordinance) => void;
   onDelete: (id: string) => void;
 }) {
+  const sections = parseDocumentSections(ord.fullText);
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
-      <Card className="w-full max-w-3xl shadow-2xl my-4 bg-white">
+      <Card className="w-full max-w-3xl shadow-2xl my-4 bg-white animate-fadeUp">
         {/* Toolbar */}
         <div className="flex items-center justify-between px-6 py-4 border-b print:hidden">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="border-primary/30 text-primary">{ord.type}</Badge>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ord.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{ord.status}</span>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-primary/20 text-primary">{ord.type}</span>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusStyle[ord.status]}`}>{ord.status}</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" className="gap-1.5" onClick={() => window.print()}>
@@ -160,23 +173,49 @@ function OrdinanceDocument({ ord, onClose, onEdit, onDelete }: {
           </div>
         </div>
 
-        {/* White clean document */}
+        {/* Document Body */}
         <div className="p-8 sm:p-12 bg-white" id="print-area">
+          {/* Gov Header */}
           <div className="text-center mb-8">
-            <p className="text-sm font-semibold text-gray-700">Republic of the Philippines</p>
-            <p className="text-sm text-gray-600">Province of Zambales · Municipality of San Antonio</p>
-            <p className="text-base font-bold text-gray-900 mt-1">BARANGAY SANTIAGO SAZ</p>
+            <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Republic of the Philippines</p>
+            <p className="text-xs text-gray-600">Province of Zambales · Municipality of San Antonio</p>
+            <p className="text-sm font-bold text-gray-900 mt-1 uppercase">Barangay Santiago Saz</p>
+            <p className="text-xs text-gray-500">Sangguniang Barangay</p>
             <div className="border-b-2 border-gray-800 mt-4 mb-6" />
-            <p className="text-xs font-mono text-gray-500 mb-1">{ord.number}</p>
-            <h1 className="text-lg font-bold text-gray-900 uppercase leading-tight">{ord.title}</h1>
-            <p className="text-xs text-gray-500 mt-2">
-              Enacted: {new Date(ord.dateEnacted).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" })} · Author: {ord.author}
-            </p>
+            <p className="text-xs font-mono text-gray-500 mb-2 tracking-widest">{ord.number}</p>
+            <h1 className="text-base font-bold text-gray-900 uppercase leading-snug max-w-lg mx-auto">{ord.title}</h1>
+            <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><User className="w-3 h-3" />{ord.author}</span>
+              <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(ord.dateEnacted).toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" })}</span>
+            </div>
           </div>
 
-          <div className="prose prose-sm max-w-none">
-            <p className="text-sm text-gray-600 italic mb-6">{ord.summary}</p>
-            <pre className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">{ord.fullText}</pre>
+          {/* Summary callout */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg px-5 py-3 mb-6">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Summary</p>
+            <p className="text-sm text-gray-700 italic leading-relaxed">{ord.summary}</p>
+          </div>
+
+          {/* Full Text Sections */}
+          <div className="space-y-4">
+            {sections.map((section, i) => {
+              const lines = section.split("\n");
+              const firstLine = lines[0];
+              const rest = lines.slice(1).join("\n").trim();
+              const isSectionHeader = /^SECTION\s+\d+/i.test(firstLine) || /^(BARANGAY|AN ORDINANCE|AN RESOLUTION|BE IT|ENACTED|Certified|Approved|Barangay Councilors)/i.test(firstLine);
+              return (
+                <div key={i} className={isSectionHeader ? "pt-2" : ""}>
+                  {isSectionHeader ? (
+                    <>
+                      <p className="text-xs font-bold text-gray-800 uppercase tracking-wide mb-1">{firstLine}</p>
+                      {rest && <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{rest}</p>}
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{section}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </Card>
@@ -215,13 +254,9 @@ export default function OfficialOrdinancesPage() {
 
   const openEdit = (ord: Ordinance) => {
     setForm({
-      number: ord.number,
-      title: ord.title,
-      type: ord.type,
-      dateEnacted: ord.dateEnacted,
-      author: ord.author,
-      summary: ord.summary,
-      fullText: ord.fullText,
+      number: ord.number, title: ord.title, type: ord.type,
+      dateEnacted: ord.dateEnacted, author: ord.author,
+      summary: ord.summary, fullText: ord.fullText,
     });
     setEditingId(ord.id);
     setShowForm(true);
@@ -242,28 +277,17 @@ export default function OfficialOrdinancesPage() {
     e.preventDefault();
     if (editingId) {
       setOrdinances(prev => prev.map(o => o.id === editingId ? {
-        ...o,
-        number: form.number,
-        title: form.title.toUpperCase(),
-        type: form.type,
-        dateEnacted: form.dateEnacted,
-        author: form.author,
-        status: o.status,
-        summary: form.summary,
-        fullText: form.fullText,
+        ...o, number: form.number, title: form.title.toUpperCase(),
+        type: form.type, dateEnacted: form.dateEnacted, author: form.author,
+        summary: form.summary, fullText: form.fullText,
       } : o));
       toast({ title: "Ordinance Updated", description: `${form.number} has been updated.` });
     } else {
       const newOrd: Ordinance = {
-        id: `ord-${Date.now()}`,
-        number: form.number,
-        title: form.title.toUpperCase(),
-        type: form.type,
-        dateEnacted: form.dateEnacted,
-        author: form.author,
-        status: "Active",
-        summary: form.summary,
-        fullText: form.fullText,
+        id: `ord-${Date.now()}`, number: form.number,
+        title: form.title.toUpperCase(), type: form.type,
+        dateEnacted: form.dateEnacted, author: form.author,
+        status: "Active", summary: form.summary, fullText: form.fullText,
       };
       setOrdinances(prev => [newOrd, ...prev]);
       toast({ title: "Ordinance Added", description: `${form.number} has been recorded.` });
@@ -305,7 +329,7 @@ export default function OfficialOrdinancesPage() {
           </div>
         </div>
 
-        {/* Document viewer */}
+        {/* Document Viewer */}
         {selected && (
           <OrdinanceDocument
             ord={selected}
@@ -363,46 +387,67 @@ export default function OfficialOrdinancesPage() {
           </div>
         )}
 
-        <div className="space-y-2">
-          {filtered.map(ord => (
-            <Card
-              key={ord.id}
-              className="p-4 border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer"
-              onClick={() => setSelected(ord)}
-              data-testid={`ordinance-row-${ord.id}`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                  <BookOpen className="w-5 h-5 text-muted-foreground" />
+        {/* Ordinance Cards Grid */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {filtered.length === 0 ? (
+            <div className="sm:col-span-2 text-center py-12">
+              <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-muted-foreground">No ordinances found</p>
+            </div>
+          ) : (
+            filtered.map(ord => (
+              <Card
+                key={ord.id}
+                className="p-5 border-border/50 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group"
+                onClick={() => setSelected(ord)}
+                data-testid={`ordinance-row-${ord.id}`}
+              >
+                {/* Top row: type + status */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full border border-primary/20 text-primary bg-primary/5">{ord.type}</span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusStyle[ord.status]}`}>{ord.status}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-mono text-muted-foreground">{ord.number}</span>
-                    <Badge variant="outline" className="text-xs border-primary/20 text-primary">{ord.type}</Badge>
-                    <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${ord.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-700"}`}>{ord.status}</span>
+
+                {/* Title */}
+                <h3 className="text-sm font-bold text-foreground leading-snug line-clamp-3 mb-3 uppercase">{ord.title}</h3>
+
+                {/* Meta */}
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                  <span className="flex items-center gap-1"><User className="w-3 h-3" />{ord.author}</span>
+                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(ord.dateEnacted).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</span>
+                </div>
+
+                {/* Summary */}
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-4">{ord.summary}</p>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                  <span className="text-xs font-mono text-muted-foreground/70">{ord.number}</span>
+                  <div className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Eye className="w-3.5 h-3.5" /> View
+                    </span>
+                    <div className="flex gap-1 ml-2" onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={e => { e.stopPropagation(); openEdit(ord); }}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition"
+                        title="Edit"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); handleDelete(ord.id); }}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-foreground line-clamp-2">{ord.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{ord.author} · {new Date(ord.dateEnacted).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</p>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 mt-1">
-                  <button
-                    onClick={e => { e.stopPropagation(); openEdit(ord); setShowForm(true); setSelected(null); }}
-                    className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition"
-                    title="Edit"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={e => { e.stopPropagation(); handleDelete(ord.id); }}
-                    className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </div>
