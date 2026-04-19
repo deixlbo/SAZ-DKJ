@@ -93,12 +93,20 @@ export const api = {
   ordinances: {
     list: (params?: any) => apiClient.get("/ordinances", { params }),
     get: (id: string) => apiClient.get(`/ordinances/${id}`),
+    create: (data: any) => apiClient.post("/ordinances", data),
+    update: (id: string, data: any) =>
+      apiClient.put(`/ordinances/${id}`, data),
+    delete: (id: string) => apiClient.delete(`/ordinances/${id}`),
   },
 
   // Businesses
   businesses: {
     list: (params?: any) => apiClient.get("/businesses", { params }),
     get: (id: string) => apiClient.get(`/businesses/${id}`),
+    create: (data: any) => apiClient.post("/businesses", data),
+    update: (id: string, data: any) =>
+      apiClient.put(`/businesses/${id}`, data),
+    delete: (id: string) => apiClient.delete(`/businesses/${id}`),
   },
 
   // AI Chatbot
