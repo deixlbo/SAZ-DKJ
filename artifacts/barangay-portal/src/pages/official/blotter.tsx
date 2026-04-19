@@ -179,7 +179,9 @@ export default function OfficialBlotterPage() {
   const filtered = cases.filter(c => {
     const matchSearch = c.id.toLowerCase().includes(search.toLowerCase())
       || c.incidentType.toLowerCase().includes(search.toLowerCase())
-      || c.reportedBy.toLowerCase().includes(search.toLowerCase());
+      || c.reportedBy.toLowerCase().includes(search.toLowerCase())
+      || c.location.toLowerCase().includes(search.toLowerCase())
+      || (c.respondent && c.respondent.toLowerCase().includes(search.toLowerCase()));
     const matchFilter = filter === "all" || c.status === filter;
     const matchDate = !selectedDate || c.date === selectedDate;
     return matchSearch && matchFilter && matchDate;
@@ -211,7 +213,7 @@ export default function OfficialBlotterPage() {
     updateStatus(selected.id, "scheduled", { hearing: { ...hearing } });
     setShowHearingForm(false);
     setHearing({ date: "", time: "", luponOfficer: "" });
-    toast({ title: "Hearing Scheduled", description: `Both parties notified for ${new Date(hearing.date).toLocaleDateString("en-PH", { month: "long", day: "numeric" })} at ${hearing.time}.` });
+    toast({ title: "Hearing Scheduled & Respondent Notified", description: `Respondent ${selected.respondent || "has"} been notified. Hearing: ${new Date(hearing.date).toLocaleDateString("en-PH", { month: "long", day: "numeric" })} at ${hearing.time}.` });
   };
 
   const handleRecordAttendance = () => {
@@ -235,7 +237,7 @@ export default function OfficialBlotterPage() {
     });
     setShowResolutionForm(false);
     setResolution({ details: "", agreement: "", remarks: "", outcome: "settled" });
-    toast({ title: "Resolution Recorded", description: `Case outcome: ${resolution.outcome}.` });
+    toast({ title: `Resolution Recorded & Respondent Notified`, description: `${selected.respondent || "Respondent"} has been notified. Case outcome: ${resolution.outcome}.` });
   };
 
   const handleCancelApprove = () => {

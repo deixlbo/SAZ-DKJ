@@ -256,6 +256,13 @@ export default function ResidentDocumentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDoc || !purpose.trim()) return;
+    
+    // Check if all required documents are uploaded
+    if (uploadedFiles.length < selectedDoc.requirements.length) {
+      toast({ title: "Missing Documents", description: `Please upload all ${selectedDoc.requirements.length} required documents before submitting.`, variant: "destructive" });
+      return;
+    }
+    
     setLoading(true);
     try {
       const created = await api.documents.create({
@@ -267,6 +274,7 @@ export default function ResidentDocumentsPage() {
         date: new Date().toISOString().split("T")[0],
         address: userData?.address ?? "",
         notes: "",
+        uploadedFiles: uploadedFiles,
       });
       setDocs(prev => [created, ...prev]);
       setSelectedDoc(null); setPurpose(""); setUploadedFiles([]);
@@ -307,12 +315,18 @@ export default function ResidentDocumentsPage() {
               <button onClick={() => setSelectedDoc(null)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted"><X className="w-5 h-5" /></button>
             </div>
             <div className="mb-5 p-4 bg-muted/50 rounded-xl">
-              <p className="text-xs font-semibold text-foreground mb-2">Required Documents</p>
+              <p className="text-xs font-semibold text-foreground mb-2">Required Documents Checklist</p>
               <ul className="space-y-1.5">
-                {selectedDoc.requirements.map(req => (
-                  <li key={req} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />{req}</li>
+                {selectedDoc.requirements.map((req, idx) => (
+                  <li key={req} className={`flex items-start gap-2 text-sm ${uploadedFiles.length > idx ? "text-emerald-600" : "text-muted-foreground"}`}>
+                    {uploadedFiles.length > idx ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> : <FileQuestion className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />}
+                    {req}
+                  </li>
                 ))}
               </ul>
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <p className="text-xs font-medium text-foreground">Uploaded: <span className={uploadedFiles.length === selectedDoc.requirements.length ? "text-emerald-600" : "text-amber-600"}>{uploadedFiles.length}/{selectedDoc.requirements.length}</span></p>
+              </div>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

@@ -36,8 +36,8 @@ export default function OfficialLoginPage() {
             <div className="w-20 h-20 rounded-full border-4 border-sidebar/20 overflow-hidden mx-auto mb-4">
               <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Official Portal</h1>
-            <p className="text-muted-foreground text-sm mt-1">Sign in to the administrative panel</p>
+            <h1 className="text-2xl font-bold text-foreground">Barangay Official Login</h1>
+            <p className="text-muted-foreground text-sm mt-1">Authorized officials only</p>
           </div>
 
           <div className="flex items-center justify-center gap-2 px-4 py-2 bg-sidebar/10 rounded-lg mb-6">
@@ -110,10 +110,8 @@ export default function OfficialLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
-              Demo: <span className="font-medium text-foreground">captain@brgy-santiago.gov.ph</span> / any password (4+ chars)
-            </p>
+          <div className="mt-4 p-3 bg-sidebar/10 rounded-lg border border-sidebar/20 text-center">
+            <p className="text-xs text-sidebar font-medium">Demo: captain@brgy-santiago.gov.ph / any password (4+ chars)</p>
           </div>
 
           <div className="mt-4 p-3 bg-muted rounded-lg">

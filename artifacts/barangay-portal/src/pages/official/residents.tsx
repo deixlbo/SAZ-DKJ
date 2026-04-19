@@ -23,6 +23,7 @@ interface Resident {
   email: string;
   phone: string;
   address: string;
+  purok?: string;
   birthDate: string;
   gender: Gender;
   civilStatus: CivilStatus;
@@ -52,12 +53,18 @@ const statusClasses: Record<string, string> = {
   cancelled: "bg-pink-50 text-pink-700",
 };
 
+const PUROKS = [
+  "Purok 1 - Saranay", "Purok 2 - Kaunlaran", "Purok 3 - Bonifacio",
+  "Purok 4 - Pagkakaisa", "Purok 5 - Maligaya", "Purok 6 - Masagana",
+];
+
 export default function OfficialResidentsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
   const [residents, setResidents] = useState<Resident[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | ResidentStatus>("all");
+  const [purokFilter, setPurokFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Resident | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileTab>("profile");
   const [showForm, setShowForm] = useState(false);
@@ -78,7 +85,8 @@ export default function OfficialResidentsPage() {
       || r.id.toLowerCase().includes(search.toLowerCase())
       || r.address.toLowerCase().includes(search.toLowerCase());
     const f = filter === "all" || r.status === filter;
-    return m && f;
+    const p = purokFilter === "all" || r.purok === purokFilter;
+    return m && f && p;
   });
 
   const [form, setForm] = useState({
@@ -129,6 +137,16 @@ export default function OfficialResidentsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input placeholder="Search residents..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
+          <select 
+            value={purokFilter} 
+            onChange={e => setPurokFilter(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-input bg-background text-foreground"
+          >
+            <option value="all">All Puroks</option>
+            {PUROKS.map(purok => (
+              <option key={purok} value={purok}>{purok}</option>
+            ))}
+          </select>
           <div className="flex gap-2">
             {(["all", "active", "inactive"] as const).map(f => (
               <button

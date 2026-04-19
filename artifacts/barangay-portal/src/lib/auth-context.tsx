@@ -30,8 +30,8 @@ const DEMO_RESIDENTS: UserData[] = [
 ];
 
 const DEMO_OFFICIALS: UserData[] = [
-  { uid: "off-001", email: "captain@brgy-santiago.gov.ph", fullName: "Hon. Rolando C. Borja", role: "official", address: "Barangay Hall, Santiago" },
-  { uid: "off-002", email: "secretary@brgy-santiago.gov.ph", fullName: "Sec. Maria D. Santos", role: "official" },
+  { uid: "off-001", email: "captain@brgy-santiago.gov.ph", fullName: "Barangay Captain", role: "official", address: "Barangay Hall, Santiago" },
+  { uid: "off-002", email: "secretary@brgy-santiago.gov.ph", fullName: "Barangay Secretary", role: "official" },
 ];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

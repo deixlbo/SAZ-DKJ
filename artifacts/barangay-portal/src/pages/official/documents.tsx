@@ -11,7 +11,7 @@ import { api } from "@/lib/api";
 import {
   FileText, Search, CheckCircle2, XCircle, Clock, AlertCircle, Eye,
   Printer, CalendarDays, List, FileQuestion, Settings, Plus, Trash2,
-  Bell, Upload, File, CreditCard, Banknote
+  Bell, Upload, File, CreditCard, Banknote, Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -230,9 +230,7 @@ export default function OfficialDocumentsPage() {
   const getDateCount = (date: string) => docs.filter(d => d.date === date).length;
 
   const filtered = docs.filter(d => {
-    const matchSearch = d.residentName.toLowerCase().includes(search.toLowerCase())
-      || d.documentType.toLowerCase().includes(search.toLowerCase())
-      || d.id.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = search === "" || d.documentType === search;
     const matchFilter = filter === "all" || d.status === filter;
     const matchDate = !selectedDate || d.date === selectedDate;
     return matchSearch && matchFilter && matchDate;
@@ -320,7 +318,7 @@ export default function OfficialDocumentsPage() {
       {printDoc && <PrintDocument doc={printDoc} onClose={() => setPrintDoc(null)} />}
       {receiptDoc && <ReceiptDocument doc={receiptDoc} onClose={() => setReceiptDoc(null)} />}
 
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4 print:p-0">
         {/* Settings */}
         {view === "settings" && (
           <div className="space-y-4">
@@ -401,9 +399,17 @@ export default function OfficialDocumentsPage() {
         {view === "list" && (
           <>
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input placeholder="Search by name, type, ID..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+              <div className="flex-1">
+                <select 
+                  value={search} 
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground"
+                >
+                  <option value="">All Documents</option>
+                  {defaultDocTypes.map(dt => (
+                    <option key={dt.name} value={dt.name}>{dt.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {(["all", "pending", "processing", "approved", "rejected", "needs-docs", "awaiting-payment", "paid"] as const).map(f => (
@@ -413,6 +419,9 @@ export default function OfficialDocumentsPage() {
                   </button>
                 ))}
               </div>
+              <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+                <Download className="w-4 h-4" /> Export to Excel
+              </Button>
             </div>
 
             <div className="space-y-2">

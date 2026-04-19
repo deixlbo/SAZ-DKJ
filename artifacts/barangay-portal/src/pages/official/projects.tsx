@@ -10,11 +10,11 @@ import { MiniCalendar } from "@/components/portal/mini-calendar";
 import { api } from "@/lib/api";
 import {
   FolderKanban, Plus, X, Users, MapPin, CheckCircle2, Clock,
-  DollarSign, CalendarDays, List, Pencil, Trash2, Eye
+  DollarSign, CalendarDays, List, Pencil, Trash2, Eye, Printer
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type ProjectStatus = "planning" | "ongoing" | "completed";
+type ProjectStatus = "ongoing" | "completed";
 
 interface WorkPlanRow {
   activity: string;
@@ -55,7 +55,6 @@ interface Project {
 }
 
 const statusStyles: Record<ProjectStatus, string> = {
-  planning: "bg-blue-50 text-blue-700 border-blue-200",
   ongoing: "bg-amber-50 text-amber-700 border-amber-200",
   completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
@@ -234,6 +233,9 @@ export default function OfficialProjectsPage() {
             <Button size="sm" variant={view === "calendar" ? "default" : "outline"} onClick={() => setView("calendar")} className="gap-1.5">
               <CalendarDays className="w-4 h-4" /><span className="hidden sm:inline">Calendar</span>
             </Button>
+            <Button size="sm" onClick={() => window.print()} variant="outline" className="gap-1.5 border-primary/30 text-primary hover:bg-primary/5">
+              <Printer className="w-4 h-4" /><span className="hidden sm:inline">Print</span>
+            </Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90 gap-2" onClick={openCreate}>
               <Plus className="w-4 h-4" /><span className="hidden sm:inline">Add Proposal</span>
             </Button>
@@ -242,6 +244,13 @@ export default function OfficialProjectsPage() {
       />
 
       <div className="p-4 sm:p-6 space-y-4">
+        
+        {/* Government Header for Printing */}
+        <div className="hidden print:block text-center text-sm mb-6 pb-4 border-b-2 border-gray-400">
+          <p className="font-semibold">Republic of the Philippines</p>
+          <p>Province of Zambales · Municipality of San Antonio</p>
+          <p className="font-bold text-base">BARANGAY SANTIAGO SAZ</p>
+        </div>
 
         {/* Calendar View */}
         {view === "calendar" && (
@@ -293,13 +302,16 @@ export default function OfficialProjectsPage() {
         {view === "list" && (
           <>
             <div className="flex gap-2 flex-wrap">
-              {(["all", "planning", "ongoing", "completed"] as const).map(f => (
+              {(["all", "ongoing", "completed"] as const).map(f => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
                   className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-all ${filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
                 >
                   {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
                 </button>
               ))}
             </div>

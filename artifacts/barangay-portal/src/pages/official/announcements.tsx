@@ -173,7 +173,7 @@ export default function OfficialAnnouncementsPage() {
         }
       />
 
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4 print:p-0">
 
         {/* Create/Edit Form — Government Template */}
         {showForm && (

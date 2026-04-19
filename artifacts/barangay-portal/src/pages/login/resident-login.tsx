@@ -36,8 +36,8 @@ export default function ResidentLoginPage() {
             <div className="w-20 h-20 rounded-full border-4 border-primary/20 overflow-hidden mx-auto mb-4">
               <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Barangay Santiago</h1>
-            <p className="text-muted-foreground text-sm mt-1">Resident Portal</p>
+            <h1 className="text-2xl font-bold text-foreground">Resident Login</h1>
+            <p className="text-muted-foreground text-sm mt-1">Access your barangay account</p>
           </div>
 
           <div className="flex items-center justify-center gap-2 px-4 py-2 bg-primary/10 rounded-lg mb-6">
@@ -110,10 +110,8 @@ export default function ResidentLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
-              Demo: <span className="font-medium text-foreground">juan@email.com</span> / any password (4+ chars)
-            </p>
+          <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/20 text-center">
+            <p className="text-xs text-primary font-medium">Demo: juan@email.com / any password (4+ chars)</p>
           </div>
 
           <div className="mt-4 space-y-3">

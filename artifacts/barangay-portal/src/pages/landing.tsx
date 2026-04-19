@@ -7,19 +7,9 @@ import {
   Shield, Heart, AlertTriangle, Menu, X, Building2, CheckCircle2,
   ChevronRight, Sparkles, Globe
 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { userData } = useAuth();
-
-  const getDashboardUrl = () => {
-    if (userData?.role === "official") return "/official/dashboard";
-    if (userData?.role === "resident") return "/resident/dashboard";
-    return null;
-  };
-
-  const dashboardUrl = getDashboardUrl();
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,31 +51,20 @@ export default function LandingPage() {
               ))}
             </div>
 
-            {/* Right: Login or Dashboard */}
+            {/* Right: Login */}
             <div className="ml-auto hidden md:flex items-center gap-2">
-              {dashboardUrl ? (
-                <Link href={dashboardUrl}>
-                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </Button>
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login/resident">
-                    <Button size="sm" variant="ghost" className="text-sidebar-foreground hover:bg-sidebar-accent/40 gap-1.5">
-                      <Users className="w-4 h-4" />
-                      Resident Login
-                    </Button>
-                  </Link>
-                  <Link href="/login/official">
-                    <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5">
-                      <Shield className="w-4 h-4" />
-                      Official Login
-                    </Button>
-                  </Link>
-                </>
-              )}
+              <Link href="/login/resident">
+                <Button size="sm" variant="ghost" className="text-sidebar-foreground hover:bg-sidebar-accent/40 gap-1.5">
+                  <Users className="w-4 h-4" />
+                  Resident Login
+                </Button>
+              </Link>
+              <Link href="/login/official">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5">
+                  <Shield className="w-4 h-4" />
+                  Official Login
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -105,26 +84,16 @@ export default function LandingPage() {
                 </a>
               ))}
               <div className="pt-2 mt-1 border-t border-sidebar-border/50 flex flex-col gap-2">
-                {dashboardUrl ? (
-                  <Link href={dashboardUrl} onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground justify-start gap-2" size="sm">
-                      <Users className="w-4 h-4" /> Go to Dashboard
-                    </Button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href="/login/resident" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground justify-start gap-2" size="sm">
-                        <Users className="w-4 h-4" /> Resident Login
-                      </Button>
-                    </Link>
-                    <Link href="/login/official" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full border-sidebar-foreground/30 text-sidebar-foreground justify-start gap-2" size="sm">
-                        <Shield className="w-4 h-4" /> Official Login
-                      </Button>
-                    </Link>
-                  </>
-                )}
+                <Link href="/login/resident" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground justify-start gap-2" size="sm">
+                    <Users className="w-4 h-4" /> Resident Login
+                  </Button>
+                </Link>
+                <Link href="/login/official" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full border-sidebar-foreground/30 text-sidebar-foreground justify-start gap-2" size="sm">
+                    <Shield className="w-4 h-4" /> Official Login
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -143,7 +112,7 @@ export default function LandingPage() {
             </div>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/30 mb-4">
               <Sparkles className="w-3.5 h-3.5 text-accent" />
-              <span className="text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wide">AI-Assisted Portal</span>
+              <span className="text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wide">Smart Government Portal</span>
             </div>
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-sidebar-foreground mb-4 leading-tight">
               Barangay Santiago Saz
