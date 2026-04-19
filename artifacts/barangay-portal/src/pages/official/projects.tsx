@@ -336,14 +336,25 @@ export default function OfficialProjectsPage() {
 
         {/* Detail View */}
         {selected && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-            <Card className="w-full max-w-2xl p-6 shadow-2xl my-4 animate-fadeUp">
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto print:inset-0 print:p-0 print:bg-transparent">
+            <Card className="w-full max-w-2xl p-6 shadow-2xl my-4 animate-fadeUp print:shadow-none print:border-0 print:p-0 print:m-0 print:rounded-0">
+              <div className="print:hidden mb-4 border-b pb-4">
+                <div className="text-center mb-4 text-sm">
+                  <p className="text-xs">Republic of the Philippines</p>
+                  <p className="text-xs">Province of Zambales · Municipality of San Antonio</p>
+                  <p className="text-sm font-bold">BARANGAY SANTIAGO SAZ</p>
+                  <p className="text-xs">Office of the Punong Barangay</p>
+                </div>
+              </div>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <span className="text-xs border border-primary/20 text-primary px-1.5 py-0.5 rounded-full mb-1 inline-block">{selected.category}</span>
                   <h2 className="text-xl font-bold text-foreground">{selected.title}</h2>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <button onClick={() => window.print()} className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition" title="Print">
+                    <Eye className="w-4 h-4" />
+                  </button>
                   <button onClick={() => openEdit(selected)} className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition">
                     <Pencil className="w-4 h-4" />
                   </button>

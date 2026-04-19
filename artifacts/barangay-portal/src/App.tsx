@@ -18,6 +18,7 @@ import ResidentDashboard from "@/pages/resident/dashboard";
 import ResidentDocumentsPage from "@/pages/resident/documents";
 import ResidentAnnouncementsPage from "@/pages/resident/announcements";
 import ResidentBlotterPage from "@/pages/resident/blotter";
+import ResidentAssetsPage from "@/pages/resident/assets";
 import ResidentProfilePage from "@/pages/resident/profile";
 import ResidentOrdinancesPage from "@/pages/resident/ordinances";
 
@@ -79,6 +80,11 @@ function Router() {
       <Route path="/resident/blotter">
         <RequireAuth role="resident">
           <PortalLayout><ResidentBlotterPage /></PortalLayout>
+        </RequireAuth>
+      </Route>
+      <Route path="/resident/assets">
+        <RequireAuth role="resident">
+          <PortalLayout><ResidentAssetsPage /></PortalLayout>
         </RequireAuth>
       </Route>
       <Route path="/resident/profile">

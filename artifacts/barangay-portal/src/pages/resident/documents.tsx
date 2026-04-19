@@ -256,6 +256,10 @@ export default function ResidentDocumentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDoc || !purpose.trim()) return;
+    if (uploadedFiles.length === 0) {
+      toast({ title: "Documents Required", description: "Please upload all required documents before submitting your request.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
       const created = await api.documents.create({

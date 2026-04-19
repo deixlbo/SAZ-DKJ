@@ -26,11 +26,7 @@ export default function ResidentLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-primary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-fadeUp">
-        <Link href="/">
-          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6 transition" data-testid="link-back-home">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </button>
-        </Link>
+
         <Card className="p-8 border-primary/20 shadow-xl">
           <div className="text-center mb-8">
             <div className="w-20 h-20 rounded-full border-4 border-primary/20 overflow-hidden mx-auto mb-4">
@@ -117,11 +113,6 @@ export default function ResidentLoginPage() {
           </div>
 
           <div className="mt-4 space-y-3">
-            <Link href="/register">
-              <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-primary/30 text-primary hover:bg-primary/5 transition text-sm font-medium">
-                <UserPlus className="w-4 h-4" /> Create a Resident Account
-              </button>
-            </Link>
 
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 flex items-start gap-2">
               <Clock className="w-3.5 h-3.5 shrink-0 mt-0.5" />

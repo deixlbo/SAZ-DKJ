@@ -26,18 +26,14 @@ export default function OfficialLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sidebar/20 via-background to-primary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-fadeUp">
-        <Link href="/">
-          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6 transition" data-testid="link-back-home">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </button>
-        </Link>
+
         <Card className="p-8 border-sidebar/20 shadow-xl">
           <div className="text-center mb-8">
             <div className="w-20 h-20 rounded-full border-4 border-sidebar/20 overflow-hidden mx-auto mb-4">
               <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Official Portal</h1>
-            <p className="text-muted-foreground text-sm mt-1">Sign in to the administrative panel</p>
+            <h1 className="text-2xl font-bold text-foreground">Barangay Santiago Saz</h1>
+            <p className="text-muted-foreground text-sm mt-1">Official Portal</p>
           </div>
 
           <div className="flex items-center justify-center gap-2 px-4 py-2 bg-sidebar/10 rounded-lg mb-6">

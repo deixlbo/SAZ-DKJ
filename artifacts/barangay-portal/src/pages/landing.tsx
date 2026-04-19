@@ -141,10 +141,7 @@ export default function LandingPage() {
                 <img src="/santiago.jpg" alt="Barangay Santiago Saz" className="w-full h-full object-cover" />
               </div>
             </div>
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/30 mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-accent" />
-              <span className="text-xs font-semibold text-sidebar-foreground/90 uppercase tracking-wide">AI-Assisted Portal</span>
-            </div>
+
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-sidebar-foreground mb-4 leading-tight">
               Barangay Santiago Saz
               <span className="block text-primary mt-1 text-2xl sm:text-4xl lg:text-5xl">Resident & Official Portal</span>

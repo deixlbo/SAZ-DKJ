@@ -206,7 +206,7 @@ export default function OfficialDocumentsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
   const [docs, setDocs] = useState<DocRequest[]>([]);
-  const [search, setSearch] = useState("");
+  const [docTypeFilter, setDocTypeFilter] = useState<string>("all");
   const [filter, setFilter] = useState<"all" | DocStatus>("all");
   const [selected, setSelected] = useState<DocRequest | null>(null);
   const [printDoc, setPrintDoc] = useState<DocRequest | null>(null);
@@ -230,12 +230,10 @@ export default function OfficialDocumentsPage() {
   const getDateCount = (date: string) => docs.filter(d => d.date === date).length;
 
   const filtered = docs.filter(d => {
-    const matchSearch = d.residentName.toLowerCase().includes(search.toLowerCase())
-      || d.documentType.toLowerCase().includes(search.toLowerCase())
-      || d.id.toLowerCase().includes(search.toLowerCase());
+    const matchDocType = docTypeFilter === "all" || d.documentType === docTypeFilter;
     const matchFilter = filter === "all" || d.status === filter;
     const matchDate = !selectedDate || d.date === selectedDate;
-    return matchSearch && matchFilter && matchDate;
+    return matchDocType && matchFilter && matchDate;
   });
 
   const updateDoc = async (id: string, patch: Partial<DocRequest>) => {
@@ -401,9 +399,13 @@ export default function OfficialDocumentsPage() {
         {view === "list" && (
           <>
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input placeholder="Search by name, type, ID..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
+              <div className="flex-1">
+                <select value={docTypeFilter} onChange={e => setDocTypeFilter(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:border-primary focus:outline-none transition">
+                  <option value="all">All Document Types</option>
+                  {defaultDocTypes.map(dt => (
+                    <option key={dt.name} value={dt.name}>{dt.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {(["all", "pending", "processing", "approved", "rejected", "needs-docs", "awaiting-payment", "paid"] as const).map(f => (

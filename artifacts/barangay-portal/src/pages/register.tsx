@@ -135,11 +135,6 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-primary/10 flex items-center justify-center p-4">
       <div className="w-full max-w-lg animate-fadeUp py-8">
-        <Link href="/login/resident">
-          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6 transition">
-            <ArrowLeft className="w-4 h-4" /> Back to Login
-          </button>
-        </Link>
 
         <Card className="p-8 border-primary/20 shadow-xl">
           <div className="text-center mb-7">
