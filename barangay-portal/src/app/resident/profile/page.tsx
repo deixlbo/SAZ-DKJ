@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, Mail, Phone, MapPin, Edit2 } from 'lucide-react';
+import { Menu, Mail, Phone, MapPin, Edit2, Lightbulb } from 'lucide-react';
 
 export default function ResidentProfile() {
   return (

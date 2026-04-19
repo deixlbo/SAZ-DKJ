@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Menu, Bell } from 'lucide-react';
+import { Menu, Bell, Lightbulb } from 'lucide-react';
 
 export default function ResidentAnnouncements() {
   return (
@@ -47,6 +47,14 @@ export default function ResidentAnnouncements() {
         </div>
 
         {/* Announcements List */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+          <Lightbulb className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-semibold text-blue-900 mb-1">AI Assistant - Announcement Explanation</p>
+            <p className="text-blue-800">Ask the chatbot to explain announcements, tell you about upcoming events, or help you understand barangay processes.</p>
+          </div>
+        </div>
+
         <div className="space-y-4">
           {/* Featured Announcement */}
           <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg border border-primary/20 p-6">

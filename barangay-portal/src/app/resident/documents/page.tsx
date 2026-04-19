@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, Plus, Eye, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Menu, Plus, Eye, CheckCircle, Clock, AlertCircle, Lightbulb } from 'lucide-react';
 
 export default function ResidentDocuments() {
   return (
@@ -54,6 +54,14 @@ export default function ResidentDocuments() {
         </div>
 
         {/* Filter */}
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+          <Lightbulb className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-semibold text-green-900 mb-1">AI Document Assistant Tip</p>
+            <p className="text-green-800">Ask the chatbot for step-by-step guidance on what documents you need, how to prepare them, and what to do next!</p>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-2 mb-6">
           {['All', 'Approved', 'Pending', 'Processing'].map(status => (
             <button

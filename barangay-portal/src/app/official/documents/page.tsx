@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, Download, Plus, Eye } from 'lucide-react';
+import { Menu, Download, Plus, Eye, Lightbulb } from 'lucide-react';
 
 export default function OfficialDocuments() {
   return (
@@ -56,6 +56,14 @@ export default function OfficialDocuments() {
         </div>
 
         {/* Filter & Search */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+          <Lightbulb className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-semibold text-blue-900 mb-1">AI Document Assistant Tip</p>
+            <p className="text-blue-800">Ask the chatbot to summarize pending documents, generate approval letters, or identify bottlenecks in the process.</p>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <Input placeholder="Search by name, ID, or type..." className="flex-1" />
           <select className="px-4 py-2 rounded-lg border border-input bg-background">
