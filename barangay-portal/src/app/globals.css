@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 98%;
+  --foreground: 210 10% 12%;
+  --primary: 142 43% 35%;
+  --secondary: 142 45% 54%;
+  --sidebar: 142 52% 20%;
+  --accent: 30 88% 61%;
+  --border: 142 20% 88%;
+  --input: 210 10% 92%;
+}
+
+.dark {
+  --background: 210 12% 9%;
+  --foreground: 0 0% 95%;
+  --primary: 142 65% 42%;
+  --secondary: 142 45% 54%;
+  --sidebar: 142 50% 15%;
+  --accent: 30 88% 58%;
+  --border: 142 30% 22%;
+  --input: 210 12% 20%;
+}
+
+* {
+  @apply border-[--border];
+}
+
+body {
+  @apply bg-background text-foreground;
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
