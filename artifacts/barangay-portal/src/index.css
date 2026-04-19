@@ -67,7 +67,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* LIGHT MODE - Barangay Santiago Green Theme */
+/* LIGHT MODE - Barangay Santiago Professional Green Government Theme */
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -75,51 +75,51 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* Background: #F0FDF4 */
-  --background: 138 76% 97%;
-  /* Dark text */
-  --foreground: 150 20% 10%;
-  /* Border: light green */
-  --border: 138 30% 85%;
-  /* Card: white with slight green tint */
-  --card: 138 50% 99%;
-  --card-foreground: 150 20% 10%;
-  --card-border: 138 30% 88%;
-  /* Sidebar: Deep Green #2d5a3d -> hsl(142 33% 27%) */
-  --sidebar: 142 33% 27%;
-  --sidebar-foreground: 138 60% 95%;
-  --sidebar-border: 142 25% 22%;
-  --sidebar-primary: 142 60% 40%;
-  --sidebar-primary-foreground: 138 60% 97%;
-  --sidebar-accent: 142 30% 35%;
-  --sidebar-accent-foreground: 138 60% 95%;
-  --sidebar-ring: 142 40% 50%;
+  /* Background: Clean off-white */
+  --background: 0 0% 98%;
+  /* Dark text - Professional dark gray */
+  --foreground: 210 10% 12%;
+  /* Border: Soft gray with slight green tint */
+  --border: 142 20% 88%;
+  /* Card: Clean white */
+  --card: 0 0% 100%;
+  --card-foreground: 210 10% 12%;
+  --card-border: 142 15% 90%;
+  /* Sidebar: Deep Official Green #1b4332 -> hsl(142 52% 20%) */
+  --sidebar: 142 52% 20%;
+  --sidebar-foreground: 142 30% 95%;
+  --sidebar-border: 142 45% 18%;
+  --sidebar-primary: 142 65% 42%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 142 40% 30%;
+  --sidebar-accent-foreground: 142 30% 95%;
+  --sidebar-ring: 142 65% 42%;
   /* Popover */
-  --popover: 138 50% 99%;
-  --popover-foreground: 150 20% 10%;
-  --popover-border: 138 30% 85%;
-  /* Primary: #16A34A -> hsl(142 71% 36%) */
-  --primary: 142 71% 36%;
-  --primary-foreground: 138 60% 97%;
-  /* Secondary: #4ADE80 -> hsl(142 69% 58%) */
-  --secondary: 142 69% 58%;
-  --secondary-foreground: 150 20% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 10% 12%;
+  --popover-border: 142 20% 88%;
+  /* Primary: Strong Official Green #2d6a4f -> hsl(142 43% 35%) */
+  --primary: 142 43% 35%;
+  --primary-foreground: 0 0% 100%;
+  /* Secondary: Lighter green accent #52b788 -> hsl(142 45% 54%) */
+  --secondary: 142 45% 54%;
+  --secondary-foreground: 0 0% 100%;
   /* Muted */
-  --muted: 138 30% 93%;
-  --muted-foreground: 150 10% 45%;
-  /* Accent: #FACC15 -> hsl(48 96% 53%) */
-  --accent: 48 96% 53%;
-  --accent-foreground: 150 20% 10%;
+  --muted: 210 10% 92%;
+  --muted-foreground: 210 8% 40%;
+  /* Accent: Professional gold #f4a261 -> hsl(30 88% 61%) */
+  --accent: 30 88% 61%;
+  --accent-foreground: 210 10% 12%;
   /* Destructive */
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
   /* Input */
-  --input: 138 30% 85%;
-  --ring: 142 71% 36%;
+  --input: 210 10% 92%;
+  --ring: 142 43% 35%;
   /* Charts */
-  --chart-1: 142 71% 36%;
-  --chart-2: 142 69% 58%;
-  --chart-3: 48 96% 53%;
+  --chart-1: 142 43% 35%;
+  --chart-2: 142 45% 54%;
+  --chart-3: 30 88% 61%;
   --chart-4: 210 70% 50%;
   --chart-5: 0 72% 51%;
 
@@ -154,38 +154,38 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 142 15% 8%;
-  --foreground: 138 60% 95%;
-  --border: 142 20% 18%;
-  --card: 142 15% 11%;
-  --card-foreground: 138 60% 95%;
-  --card-border: 142 20% 18%;
-  --sidebar: 142 20% 6%;
-  --sidebar-foreground: 138 60% 90%;
-  --sidebar-border: 142 15% 12%;
-  --sidebar-primary: 142 60% 45%;
-  --sidebar-primary-foreground: 138 60% 97%;
-  --sidebar-accent: 142 20% 14%;
-  --sidebar-accent-foreground: 138 60% 90%;
-  --sidebar-ring: 142 40% 50%;
-  --popover: 142 15% 11%;
-  --popover-foreground: 138 60% 95%;
-  --popover-border: 142 20% 18%;
-  --primary: 142 71% 45%;
-  --primary-foreground: 138 60% 97%;
-  --secondary: 142 30% 20%;
-  --secondary-foreground: 138 60% 90%;
-  --muted: 142 15% 15%;
-  --muted-foreground: 150 10% 55%;
-  --accent: 48 80% 45%;
-  --accent-foreground: 150 20% 10%;
+  --background: 210 12% 9%;
+  --foreground: 0 0% 95%;
+  --border: 142 30% 22%;
+  --card: 210 12% 13%;
+  --card-foreground: 0 0% 95%;
+  --card-border: 142 30% 22%;
+  --sidebar: 142 50% 15%;
+  --sidebar-foreground: 142 30% 93%;
+  --sidebar-border: 142 40% 12%;
+  --sidebar-primary: 142 65% 45%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 142 40% 28%;
+  --sidebar-accent-foreground: 142 30% 93%;
+  --sidebar-ring: 142 65% 45%;
+  --popover: 210 12% 13%;
+  --popover-foreground: 0 0% 95%;
+  --popover-border: 142 30% 22%;
+  --primary: 142 65% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 142 45% 54%;
+  --secondary-foreground: 210 12% 13%;
+  --muted: 210 12% 18%;
+  --muted-foreground: 210 8% 60%;
+  --accent: 30 88% 58%;
+  --accent-foreground: 210 10% 12%;
   --destructive: 0 63% 40%;
   --destructive-foreground: 0 0% 100%;
-  --input: 142 20% 22%;
-  --ring: 142 71% 45%;
-  --chart-1: 142 71% 45%;
-  --chart-2: 142 69% 58%;
-  --chart-3: 48 80% 45%;
+  --input: 210 12% 20%;
+  --ring: 142 65% 42%;
+  --chart-1: 142 65% 42%;
+  --chart-2: 142 45% 54%;
+  --chart-3: 30 88% 58%;
   --chart-4: 210 70% 50%;
   --chart-5: 0 63% 40%;
 
