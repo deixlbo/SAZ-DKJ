@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockOrdinances } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { BookOpen, Search, X, Eye, Calendar, User } from "lucide-react";
 
 type OrdinanceType = "Ordinance" | "Resolution";
@@ -106,11 +106,16 @@ export default function ResidentOrdinancesPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Ordinance | null>(null);
   const [typeFilter, setTypeFilter] = useState<"all" | OrdinanceType>("all");
+  const [ordinances, setOrdinances] = useState<Ordinance[]>([]);
 
-  const filtered = (mockOrdinances as Ordinance[]).filter(o => {
+  useEffect(() => {
+    api.ordinances.list().then(setOrdinances).catch(console.error);
+  }, []);
+
+  const filtered = ordinances.filter(o => {
     const m = o.title.toLowerCase().includes(search.toLowerCase())
       || o.number.toLowerCase().includes(search.toLowerCase())
-      || o.summary.toLowerCase().includes(search.toLowerCase());
+      || (o.summary ?? "").toLowerCase().includes(search.toLowerCase());
     const f = typeFilter === "all" || o.type === typeFilter;
     return m && f;
   });

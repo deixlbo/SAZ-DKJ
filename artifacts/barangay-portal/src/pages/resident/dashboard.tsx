@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { useAuth } from "@/lib/auth-context";
-import { mockAnnouncements, mockDocumentRequests, mockBlotterCases } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   FileText, ClipboardList, Megaphone, FolderKanban,
   CheckCircle2, Clock, XCircle, AlertCircle, ArrowRight
@@ -14,10 +15,17 @@ import {
 export default function ResidentDashboard() {
   const { userData } = useAuth();
   const { toggle } = useSidebarToggle();
+  const [myDocs, setMyDocs] = useState<any[]>([]);
+  const [myBlotters, setMyBlotters] = useState<any[]>([]);
+  const [latestAnnouncement, setLatestAnnouncement] = useState<any | null>(null);
 
-  const myDocs = mockDocumentRequests.filter(d => d.residentId === userData?.uid);
-  const myBlotters = mockBlotterCases.filter(b => b.reportedById === userData?.uid);
-  const latestAnnouncement = mockAnnouncements[0];
+  useEffect(() => {
+    if (userData?.uid) {
+      api.documents.list(userData.uid).then(setMyDocs).catch(console.error);
+      api.blotter.list(userData.uid).then(setMyBlotters).catch(console.error);
+    }
+    api.announcements.list().then(list => setLatestAnnouncement(list[0] ?? null)).catch(console.error);
+  }, [userData?.uid]);
 
   const statusColor = {
     approved: "text-emerald-600 bg-emerald-50 border-emerald-200",
@@ -74,24 +82,31 @@ export default function ResidentDashboard() {
                 </button>
               </Link>
             </div>
-            <Card className="p-5 border-primary/15">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <Megaphone className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="text-xs border-primary/30 text-primary">{latestAnnouncement.category}</Badge>
-                    {latestAnnouncement.priority === "high" && (
-                      <Badge className="text-xs bg-red-100 text-red-600 border-red-200">Urgent</Badge>
-                    )}
+            {latestAnnouncement ? (
+              <Card className="p-5 border-primary/15">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Megaphone className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="font-semibold text-foreground text-sm mb-1">{latestAnnouncement.title}</h3>
-                  <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">{latestAnnouncement.content}</p>
-                  <p className="text-muted-foreground/70 text-xs mt-2">{new Date(latestAnnouncement.date).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs border-primary/30 text-primary">{latestAnnouncement.category}</Badge>
+                      {latestAnnouncement.priority === "high" && (
+                        <Badge className="text-xs bg-red-100 text-red-600 border-red-200">Urgent</Badge>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm mb-1">{latestAnnouncement.title}</h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-3">{latestAnnouncement.content}</p>
+                    <p className="text-muted-foreground/70 text-xs mt-2">{latestAnnouncement.date ? new Date(latestAnnouncement.date).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" }) : ""}</p>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            ) : (
+              <Card className="p-8 text-center border-dashed border-border/50">
+                <Megaphone className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No announcements yet</p>
+              </Card>
+            )}
           </section>
 
           {/* My Document Requests */}

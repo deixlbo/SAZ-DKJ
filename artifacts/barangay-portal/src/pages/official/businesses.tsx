@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockBusinesses } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { Building2, Plus, X, Search, Eye, CheckCircle2, Clock, AlertCircle, Bell, File, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -69,11 +69,15 @@ const enrichBusinesses = (businesses: any[]): Business[] => businesses.map((b, i
 export default function OfficialBusinessesPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [businesses, setBusinesses] = useState<Business[]>(enrichBusinesses(mockBusinesses as Business[]));
+  const [businesses, setBusinesses] = useState<Business[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | BusinessStatus>("all");
   const [selected, setSelected] = useState<Business | null>(null);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    api.businesses.list().then(data => setBusinesses(enrichBusinesses(data as Business[]))).catch(console.error);
+  }, []);
 
   const filtered = businesses.filter(b => {
     const m = b.businessName.toLowerCase().includes(search.toLowerCase()) || b.ownerName.toLowerCase().includes(search.toLowerCase());
@@ -90,10 +94,9 @@ export default function OfficialBusinessesPage() {
     businessName: "", ownerName: "", type: "Retail (Sari-Sari Store)", address: "", permitNumber: "", expiryDate: "",
   });
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newBiz: Business = {
-      id: `biz-${Date.now()}`,
+    const created = await api.businesses.create({
       businessName: form.businessName,
       ownerName: form.ownerName,
       type: form.type,
@@ -102,14 +105,15 @@ export default function OfficialBusinessesPage() {
       expiryDate: form.expiryDate || undefined,
       status: "pending",
       documents: [],
-    };
-    setBusinesses(prev => [newBiz, ...prev]);
+    });
+    setBusinesses(prev => [created as Business, ...prev]);
     setShowForm(false);
     toast({ title: "Business Registered", description: `"${form.businessName}" has been added.` });
     setForm({ businessName: "", ownerName: "", type: "Retail (Sari-Sari Store)", address: "", permitNumber: "", expiryDate: "" });
   };
 
-  const updateStatus = (id: string, status: BusinessStatus) => {
+  const updateStatus = async (id: string, status: BusinessStatus) => {
+    await api.businesses.update(id, { status });
     setBusinesses(prev => prev.map(b => b.id === id ? { ...b, status } : b));
     setSelected(prev => prev ? { ...prev, status } : null);
     toast({ title: "Status Updated", description: `Business status updated to: ${status}` });

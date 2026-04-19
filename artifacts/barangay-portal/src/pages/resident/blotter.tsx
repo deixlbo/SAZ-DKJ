@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { useAuth } from "@/lib/auth-context";
-import { mockBlotterCases } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { MapPicker } from "@/components/portal/map-picker";
 import {
   ClipboardList, Plus, X, MapPin, Clock, User, AlertCircle, Upload,
@@ -63,9 +63,14 @@ export default function ResidentBlotterPage() {
   const { toast } = useToast();
   const evidenceRef = useRef<HTMLInputElement>(null);
 
-  const initial = mockBlotterCases.filter(b => b.reportedById === userData?.uid) as BlotterCase[];
-  const [cases, setCases] = useState<BlotterCase[]>(initial);
+  const [cases, setCases] = useState<BlotterCase[]>([]);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (userData?.uid) {
+      api.blotter.list(userData.uid).then(setCases).catch(console.error);
+    }
+  }, [userData?.uid]);
   const [loading, setLoading] = useState(false);
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([]);
   const [cancelModal, setCancelModal] = useState<BlotterCase | null>(null);
@@ -92,37 +97,41 @@ export default function ResidentBlotterPage() {
     e.preventDefault();
     if (!form.location.trim() || !form.description.trim()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-
-    const newCase: BlotterCase = {
-      id: `BLT-00${32 + cases.length}`,
-      incidentType: form.incidentType,
-      location: form.location,
-      reportedBy: userData?.fullName ?? "Resident",
-      reportedById: userData?.uid ?? "",
-      status: "reported",
-      date: form.date,
-      time: form.time,
-      description: form.description,
-      narrative: form.narrative,
-      respondent: form.respondent || undefined,
-      evidence: evidenceFiles.map(f => f.name),
-    };
-
-    setCases(prev => [newCase, ...prev]);
-    setShowForm(false);
-    setForm({
-      incidentType: incidentTypes[0], location: "", lat: 0, lng: 0,
-      date: new Date().toISOString().split("T")[0], time: "", description: "", narrative: "", respondent: "",
-    });
-    setEvidenceFiles([]);
-    setLoading(false);
-    toast({ title: "Blotter Filed", description: `Case ${newCase.id} has been filed and will be reviewed by barangay officials.` });
+    try {
+      const blotterNum = `BLT-00${String(Date.now()).slice(-4)}`;
+      const created = await api.blotter.create({
+        id: blotterNum,
+        incidentType: form.incidentType,
+        location: form.location,
+        reportedBy: userData?.fullName ?? "Resident",
+        reportedById: userData?.uid ?? "",
+        status: "reported",
+        date: form.date,
+        time: form.time,
+        description: form.description,
+        narrative: form.narrative,
+        respondent: form.respondent || null,
+        notifyParties: true,
+      });
+      setCases(prev => [created, ...prev]);
+      setShowForm(false);
+      setForm({
+        incidentType: incidentTypes[0], location: "", lat: 0, lng: 0,
+        date: new Date().toISOString().split("T")[0], time: "", description: "", narrative: "", respondent: "",
+      });
+      setEvidenceFiles([]);
+      toast({ title: "Blotter Filed", description: `Case ${created.id} has been filed and will be reviewed by barangay officials.` });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to file blotter case. Please try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCancelRequest = () => {
+  const handleCancelRequest = async () => {
     if (!cancelModal) return;
     const reason = cancelReason === "Other" ? cancelNote : cancelReason;
+    await api.blotter.update(cancelModal.id, { status: "cancelled", cancellationReason: reason });
     setCases(prev => prev.map(c => c.id === cancelModal.id
       ? { ...c, cancellationReason: reason, status: "cancelled" }
       : c

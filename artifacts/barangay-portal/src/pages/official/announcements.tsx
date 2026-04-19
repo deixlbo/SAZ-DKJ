@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { MiniCalendar } from "@/components/portal/mini-calendar";
 import { useAuth } from "@/lib/auth-context";
-import { mockAnnouncements } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   Megaphone, Plus, X, Trash2, AlertTriangle, CalendarDays, List,
   Pencil, Check, MapPin, Clock, Users, Phone, Eye
@@ -64,7 +64,7 @@ export default function OfficialAnnouncementsPage() {
   const { userData } = useAuth();
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements as Announcement[]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "calendar">("list");
@@ -112,29 +112,33 @@ export default function OfficialAnnouncementsPage() {
     setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    api.announcements.list().then(data => setAnnouncements(data as Announcement[])).catch(console.error);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      setAnnouncements(prev => prev.map(a => a.id === editingId ? { ...a, ...form } : a));
+      const updated = await api.announcements.update(editingId, form);
+      setAnnouncements(prev => prev.map(a => a.id === editingId ? { ...a, ...updated } : a));
       toast({ title: "Announcement Updated", description: "Changes saved successfully." });
     } else {
-      const newAnn: Announcement = {
-        id: `ann-${Date.now()}`,
+      const created = await api.announcements.create({
         title: form.title,
         content: form.content,
         category: form.category,
         priority: form.priority,
         date: new Date().toISOString().split("T")[0],
         author: userData?.fullName ?? "Barangay Official",
-        eventDate: form.eventDate || undefined,
-        eventTime: form.eventTime || undefined,
-        venue: form.venue || undefined,
-        targetGroups: form.targetGroups.length > 0 ? form.targetGroups : undefined,
-        reminders: form.reminders || undefined,
-        contactInfo: form.contactInfo || undefined,
-        issuedBy: form.issuedBy || undefined,
-      };
-      setAnnouncements(prev => [newAnn, ...prev]);
+        eventDate: form.eventDate || null,
+        eventTime: form.eventTime || null,
+        venue: form.venue || null,
+        targetGroups: form.targetGroups.length > 0 ? form.targetGroups : null,
+        reminders: form.reminders || null,
+        contactInfo: form.contactInfo || null,
+        issuedBy: form.issuedBy || null,
+      });
+      setAnnouncements(prev => [created as Announcement, ...prev]);
       toast({ title: "Announcement Posted", description: "Your announcement has been published." });
     }
     setShowForm(false);
@@ -142,7 +146,8 @@ export default function OfficialAnnouncementsPage() {
     setForm(emptyForm);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await api.announcements.delete(id);
     setAnnouncements(prev => prev.filter(a => a.id !== id));
     toast({ title: "Deleted", description: "Announcement removed." });
   };

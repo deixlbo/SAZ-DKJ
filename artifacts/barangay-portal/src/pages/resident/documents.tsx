@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { useAuth } from "@/lib/auth-context";
-import { mockDocumentRequests } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   FileText, CheckCircle2, Clock, AlertCircle, XCircle, X, Upload,
   ChevronRight, FileQuestion, Bell, CreditCard, Banknote, Printer, Smartphone, Building2
@@ -234,9 +234,14 @@ export default function ResidentDocumentsPage() {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const initial = mockDocumentRequests.filter(d => d.residentId === userData?.uid) as DocRequest[];
-  const [docs, setDocs] = useState<DocRequest[]>(initial);
+  const [docs, setDocs] = useState<DocRequest[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<DocType | null>(null);
+
+  useEffect(() => {
+    if (userData?.uid) {
+      api.documents.list(userData.uid).then(setDocs).catch(console.error);
+    }
+  }, [userData?.uid]);
   const [purpose, setPurpose] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
@@ -252,28 +257,32 @@ export default function ResidentDocumentsPage() {
     e.preventDefault();
     if (!selectedDoc || !purpose.trim()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    const newDoc: DocRequest = {
-      id: `doc-${Date.now()}`,
-      residentId: userData?.uid ?? "",
-      residentName: userData?.fullName ?? "Resident",
-      documentType: selectedDoc.name,
-      purpose,
-      status: "pending",
-      date: new Date().toISOString().split("T")[0],
-      address: userData?.address ?? "",
-      notes: "",
-      uploadedFiles: uploadedFiles.map(f => f.name),
-    };
-    setDocs(prev => [newDoc, ...prev]);
-    setSelectedDoc(null); setPurpose(""); setUploadedFiles([]); setLoading(false);
-    setActiveTab("myrequests");
-    toast({ title: "Request Submitted", description: `Your ${selectedDoc.name} request has been submitted.` });
+    try {
+      const created = await api.documents.create({
+        residentId: userData?.uid ?? "",
+        residentName: userData?.fullName ?? "Resident",
+        documentType: selectedDoc.name,
+        purpose,
+        status: "pending",
+        date: new Date().toISOString().split("T")[0],
+        address: userData?.address ?? "",
+        notes: "",
+      });
+      setDocs(prev => [created, ...prev]);
+      setSelectedDoc(null); setPurpose(""); setUploadedFiles([]);
+      setActiveTab("myrequests");
+      toast({ title: "Request Submitted", description: `Your ${selectedDoc.name} request has been submitted.` });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to submit request.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePay = (doc: DocRequest, method: PayMethod, ref: string) => {
+  const handlePay = async (doc: DocRequest, method: PayMethod, ref: string) => {
     const now = new Date().toISOString().split("T")[0];
-    setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, status: "paid", paymentMethod: method, paymentRef: ref || undefined, paymentDate: now } : d));
+    const updated = await api.documents.update(doc.id, { status: "paid", paymentMethod: method, paymentRef: ref || null, paymentDate: now });
+    setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, ...updated } : d));
     const paid = { ...doc, status: "paid" as DocStatus, paymentMethod: method, paymentRef: ref || undefined, paymentDate: now };
     setPayingDoc(null);
     setReceiptDoc(paid);

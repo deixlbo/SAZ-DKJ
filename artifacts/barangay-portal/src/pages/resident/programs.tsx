@@ -1,21 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockProjects } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { FolderKanban, Users, MapPin, CalendarDays, CheckCircle2, Clock, ArrowRight, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type ProjectStatus = "planning" | "ongoing" | "completed";
 
+type Project = { id: string; title: string; description: string; category: string; status: ProjectStatus; startDate: string; endDate: string; location: string; budget: number; leadBy: string; beneficiaries: number; fundSource: string; objectives?: string; targetBeneficiaries?: string; expectedOutput?: string; };
+
 export default function ResidentProgramsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [selected, setSelected] = useState<typeof mockProjects[0] | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selected, setSelected] = useState<Project | null>(null);
   const [joined, setJoined] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<"all" | ProjectStatus>("all");
+
+  useEffect(() => {
+    api.projects.list().then(data => setProjects(data as Project[])).catch(console.error);
+  }, []);
 
   const statusStyles: Record<ProjectStatus, string> = {
     planning: "bg-blue-50 text-blue-700 border-blue-200",
@@ -23,9 +30,9 @@ export default function ResidentProgramsPage() {
     completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
   };
 
-  const filtered = mockProjects.filter(p => filter === "all" || p.status === filter);
+  const filtered = projects.filter(p => filter === "all" || p.status === filter);
 
-  const handleJoin = (proj: typeof mockProjects[0]) => {
+  const handleJoin = (proj: Project) => {
     setJoined(prev => {
       const next = new Set(prev);
       next.add(proj.id);

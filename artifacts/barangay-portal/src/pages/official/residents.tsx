@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockResidents, mockDocumentRequests, mockBlotterCases } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   Users, Search, Plus, X, Phone, MapPin, User, Eye, FileText, ClipboardList,
   CheckCircle2, Clock, XCircle, AlertCircle
@@ -55,15 +55,20 @@ const statusClasses: Record<string, string> = {
 export default function OfficialResidentsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [residents, setResidents] = useState<Resident[]>(mockResidents as Resident[]);
+  const [residents, setResidents] = useState<Resident[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | ResidentStatus>("all");
   const [selected, setSelected] = useState<Resident | null>(null);
   const [activeTab, setActiveTab] = useState<ProfileTab>("profile");
   const [showForm, setShowForm] = useState(false);
+  const [allDocs, setAllDocs] = useState<any[]>([]);
+  const [allBlotter, setAllBlotter] = useState<any[]>([]);
 
-  const allDocs = mockDocumentRequests as any[];
-  const allBlotter = mockBlotterCases as any[];
+  useEffect(() => {
+    api.residents.list().then(data => setResidents(data as Resident[])).catch(console.error);
+    api.documents.list().then(setAllDocs).catch(console.error);
+    api.blotter.list().then(setAllBlotter).catch(console.error);
+  }, []);
 
   const residentDocs = selected ? allDocs.filter(d => d.residentId === selected.id || d.residentName === selected.name) : [];
   const residentBlotter = selected ? allBlotter.filter(b => b.reportedBy === selected.name) : [];
@@ -82,14 +87,10 @@ export default function OfficialResidentsPage() {
     civilStatus: "Single" as CivilStatus,
   });
 
-  const handleAddResident = (e: React.FormEvent) => {
+  const handleAddResident = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newRes: Resident = {
-      id: `RES-00${residents.length + 6}`,
-      ...form,
-      status: "active",
-    };
-    setResidents(prev => [newRes, ...prev]);
+    const created = await api.residents.create({ ...form, status: "active" });
+    setResidents(prev => [created as Resident, ...prev]);
     setShowForm(false);
     toast({ title: "Resident Added", description: `${form.name} has been registered.` });
     setForm({ name: "", email: "", phone: "", address: "", birthDate: "", gender: "Male", civilStatus: "Single" });

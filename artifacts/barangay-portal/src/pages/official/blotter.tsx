@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { MiniCalendar } from "@/components/portal/mini-calendar";
-import { mockBlotterCases } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   ClipboardList, Search, Plus, X, MapPin, Clock, User, Eye,
   CalendarDays, List, CheckCircle2, XCircle, AlertCircle, Ban,
@@ -147,7 +147,7 @@ function BlotterReportPrint({ c, onClose }: { c: BlotterCase; onClose: () => voi
 export default function OfficialBlotterPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [cases, setCases] = useState<BlotterCase[]>(mockBlotterCases as BlotterCase[]);
+  const [cases, setCases] = useState<BlotterCase[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | BlotterStatus>("all");
   const [selected, setSelected] = useState<BlotterCase | null>(null);
@@ -169,6 +169,10 @@ export default function OfficialBlotterPage() {
   const [showAttendance, setShowAttendance] = useState(false);
   const [attendance, setAttendance] = useState({ complainant: true, respondent: true });
 
+  useEffect(() => {
+    api.blotter.list().then(data => setCases(data as BlotterCase[])).catch(console.error);
+  }, []);
+
   const markedDates = cases.map(c => c.date);
   const getDateCount = (date: string) => cases.filter(c => c.date === date).length;
 
@@ -181,7 +185,8 @@ export default function OfficialBlotterPage() {
     return matchSearch && matchFilter && matchDate;
   });
 
-  const updateStatus = (id: string, status: BlotterStatus, extra?: Partial<BlotterCase>) => {
+  const updateStatus = async (id: string, status: BlotterStatus, extra?: Partial<BlotterCase>) => {
+    await api.blotter.update(id, { status, ...extra });
     setCases(prev => prev.map(c => c.id === id ? { ...c, status, ...extra } : c));
     setSelected(prev => prev ? { ...prev, status, ...extra } : null);
     toast({ title: "Status Updated", description: `Case updated to: ${status}` });

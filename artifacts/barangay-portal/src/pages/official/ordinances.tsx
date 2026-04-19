@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockOrdinances } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { BookOpen, Plus, X, Search, Printer, Pencil, Trash2, Eye, Calendar, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -226,12 +226,16 @@ function OrdinanceDocument({ ord, onClose, onEdit, onDelete }: {
 export default function OfficialOrdinancesPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [ordinances, setOrdinances] = useState<Ordinance[]>(mockOrdinances as Ordinance[]);
+  const [ordinances, setOrdinances] = useState<Ordinance[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Ordinance | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<"all" | OrdinanceType>("all");
+
+  useEffect(() => {
+    api.ordinances.list().then(data => setOrdinances(data as Ordinance[])).catch(console.error);
+  }, []);
 
   const filtered = ordinances.filter(o => {
     const m = o.title.toLowerCase().includes(search.toLowerCase())
@@ -262,7 +266,8 @@ export default function OfficialOrdinancesPage() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await api.ordinances.delete(id);
     setOrdinances(prev => prev.filter(o => o.id !== id));
     toast({ title: "Ordinance Deleted", description: "The record has been removed." });
   };
@@ -273,23 +278,20 @@ export default function OfficialOrdinancesPage() {
     toast({ title: "Template Applied", description: "Standard ordinance template has been loaded." });
   };
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      number: form.number, title: form.title.toUpperCase(),
+      type: form.type, dateEnacted: form.dateEnacted, author: form.author,
+      summary: form.summary, fullText: form.fullText,
+    };
     if (editingId) {
-      setOrdinances(prev => prev.map(o => o.id === editingId ? {
-        ...o, number: form.number, title: form.title.toUpperCase(),
-        type: form.type, dateEnacted: form.dateEnacted, author: form.author,
-        summary: form.summary, fullText: form.fullText,
-      } : o));
+      const updated = await api.ordinances.update(editingId, payload);
+      setOrdinances(prev => prev.map(o => o.id === editingId ? { ...o, ...updated } as Ordinance : o));
       toast({ title: "Ordinance Updated", description: `${form.number} has been updated.` });
     } else {
-      const newOrd: Ordinance = {
-        id: `ord-${Date.now()}`, number: form.number,
-        title: form.title.toUpperCase(), type: form.type,
-        dateEnacted: form.dateEnacted, author: form.author,
-        status: "Active", summary: form.summary, fullText: form.fullText,
-      };
-      setOrdinances(prev => [newOrd, ...prev]);
+      const created = await api.ordinances.create({ ...payload, status: "Active" });
+      setOrdinances(prev => [created as Ordinance, ...prev]);
       toast({ title: "Ordinance Added", description: `${form.number} has been recorded.` });
     }
     setShowForm(false);

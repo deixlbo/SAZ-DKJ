@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { MiniCalendar } from "@/components/portal/mini-calendar";
-import { mockProjects } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   FolderKanban, Plus, X, Users, MapPin, CheckCircle2, Clock,
   DollarSign, CalendarDays, List, Pencil, Trash2, Eye
@@ -94,7 +94,7 @@ const emptyForm = {
 export default function OfficialProjectsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [projects, setProjects] = useState<Project[]>(mockProjects as Project[]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [selected, setSelected] = useState<Project | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -102,6 +102,10 @@ export default function OfficialProjectsPage() {
   const [view, setView] = useState<"list" | "calendar">("list");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    api.projects.list().then(data => setProjects(data as Project[])).catch(console.error);
+  }, []);
 
   const filtered = filter === "all" ? projects : projects.filter(p => p.status === filter);
   const markedDates = projects.flatMap(p => [p.startDate, p.endDate]).filter(Boolean);
@@ -172,7 +176,8 @@ export default function OfficialProjectsPage() {
     setSelected(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await api.projects.delete(id);
     setProjects(prev => prev.filter(p => p.id !== id));
     setSelected(null);
     toast({ title: "Project Deleted", description: "The project has been removed." });
@@ -180,38 +185,27 @@ export default function OfficialProjectsPage() {
 
   const totalBudget = (form.budgetItems ?? []).reduce((sum, r) => sum + (parseFloat(r.totalCost) || 0), 0);
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const budgetValue = totalBudget > 0 ? totalBudget : parseFloat(form.budget) || 0;
+    const payload = {
+      title: form.title, description: form.description, category: form.category,
+      startDate: form.startDate, endDate: form.endDate, location: form.location,
+      budget: budgetValue, leadBy: form.leadBy,
+      beneficiaries: parseInt(form.beneficiaries) || 0, fundSource: form.fundSource,
+      objectives: form.objectives, targetBeneficiaries: form.targetBeneficiaries,
+      expectedOutput: form.expectedOutput, monitoring: form.monitoring,
+      workPlan: form.workPlan.filter(r => r.activity),
+      budgetItems: form.budgetItems.filter(r => r.item),
+      preparedBy: form.preparedBy, approvedBy: form.approvedBy,
+    };
     if (editingId) {
-      setProjects(prev => prev.map(p => p.id === editingId ? {
-        ...p,
-        title: form.title, description: form.description, category: form.category,
-        startDate: form.startDate, endDate: form.endDate, location: form.location,
-        budget: budgetValue, leadBy: form.leadBy,
-        beneficiaries: parseInt(form.beneficiaries) || 0, fundSource: form.fundSource,
-        objectives: form.objectives, targetBeneficiaries: form.targetBeneficiaries,
-        expectedOutput: form.expectedOutput, monitoring: form.monitoring,
-        workPlan: form.workPlan.filter(r => r.activity),
-        budgetItems: form.budgetItems.filter(r => r.item),
-        preparedBy: form.preparedBy, approvedBy: form.approvedBy,
-      } : p));
+      const updated = await api.projects.update(editingId, payload);
+      setProjects(prev => prev.map(p => p.id === editingId ? { ...p, ...updated } as Project : p));
       toast({ title: "Project Updated", description: `"${form.title}" has been updated.` });
     } else {
-      const newProj: Project = {
-        id: `PRJ-00${projects.length + 5}`,
-        title: form.title, description: form.description, category: form.category,
-        status: "planning", startDate: form.startDate, endDate: form.endDate,
-        location: form.location, budget: budgetValue, actualCost: 0,
-        leadBy: form.leadBy, beneficiaries: parseInt(form.beneficiaries) || 0,
-        fundSource: form.fundSource, milestones: [],
-        objectives: form.objectives, targetBeneficiaries: form.targetBeneficiaries,
-        expectedOutput: form.expectedOutput, monitoring: form.monitoring,
-        workPlan: form.workPlan.filter(r => r.activity),
-        budgetItems: form.budgetItems.filter(r => r.item),
-        preparedBy: form.preparedBy, approvedBy: form.approvedBy,
-      };
-      setProjects(prev => [newProj, ...prev]);
+      const created = await api.projects.create({ ...payload, status: "planning", actualCost: 0, milestones: [] });
+      setProjects(prev => [created as Project, ...prev]);
       toast({ title: "Project Proposal Added", description: `"${form.title}" has been recorded.` });
     }
     setShowForm(false);

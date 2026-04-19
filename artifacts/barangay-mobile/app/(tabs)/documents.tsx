@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,
   Modal, Platform, ActivityIndicator, Alert
@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
 
 type DocStatus = "approved" | "pending" | "processing" | "rejected" | "needs-docs" | "awaiting-payment" | "paid";
 type PayMethod = "gcash" | "bank" | "cash";
@@ -62,7 +63,14 @@ export default function DocumentsScreen() {
   const { user } = useAuth();
   const isOfficial = user?.role === "official";
 
-  const [docs, setDocs] = useState<DocRequest[]>(isOfficial ? officialDocs : initialDocs);
+  const [docs, setDocs] = useState<DocRequest[]>([]);
+
+  useEffect(() => {
+    api.documents.list(isOfficial ? undefined : user?.uid)
+      .then(data => setDocs(data as DocRequest[]))
+      .catch(() => setDocs(isOfficial ? officialDocs : initialDocs));
+  }, [isOfficial, user?.uid]);
+
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showPayNotifyModal, setShowPayNotifyModal] = useState(false);
   const [showPayModal, setShowPayModal] = useState(false);
@@ -82,9 +90,20 @@ export default function DocumentsScreen() {
   const handleSubmitRequest = async () => {
     if (!purpose.trim()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    const newDoc: DocRequest = { id: `doc-${Date.now()}`, type: docType, purpose, status: "pending", date: new Date().toISOString().split("T")[0] };
-    setDocs(prev => [newDoc, ...prev]);
+    try {
+      const created = await api.documents.create({
+        type: docType,
+        purpose,
+        status: "pending",
+        date: new Date().toISOString().split("T")[0],
+        residentId: user?.uid,
+        residentName: user?.fullName,
+      });
+      setDocs(prev => [created as DocRequest, ...prev]);
+    } catch {
+      const newDoc: DocRequest = { id: `doc-${Date.now()}`, type: docType, purpose, status: "pending", date: new Date().toISOString().split("T")[0] };
+      setDocs(prev => [newDoc, ...prev]);
+    }
     setPurpose(""); setShowRequestModal(false); setLoading(false);
   };
 
@@ -93,7 +112,9 @@ export default function DocumentsScreen() {
     const amount = parseFloat(payAmount);
     if (isNaN(amount) || amount <= 0) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
+    try {
+      await api.documents.update(selectedDoc.id, { status: "awaiting-payment", paymentAmount: amount });
+    } catch {}
     setDocs(prev => prev.map(d => d.id === selectedDoc.id ? { ...d, status: "awaiting-payment", paymentAmount: amount } : d));
     setShowPayNotifyModal(false); setShowDetailModal(false); setPayAmount(""); setLoading(false);
   };
@@ -102,15 +123,21 @@ export default function DocumentsScreen() {
     if (!selectedDoc) return;
     if ((payMethod === "gcash" || payMethod === "bank") && !payRef.trim()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
     const now = new Date().toISOString().split("T")[0];
-    setDocs(prev => prev.map(d => d.id === selectedDoc.id ? { ...d, status: "paid", paymentMethod: payMethod, paymentRef: payRef || undefined, paymentDate: now } : d));
-    const paid = { ...selectedDoc, status: "paid" as DocStatus, paymentMethod: payMethod, paymentRef: payRef || undefined, paymentDate: now };
+    const patch = { status: "paid" as DocStatus, paymentMethod: payMethod, paymentRef: payRef || undefined, paymentDate: now };
+    try {
+      await api.documents.update(selectedDoc.id, patch);
+    } catch {}
+    setDocs(prev => prev.map(d => d.id === selectedDoc.id ? { ...d, ...patch } : d));
+    const paid = { ...selectedDoc, ...patch };
     setSelectedDoc(paid);
     setShowPayModal(false); setPayRef(""); setShowReceiptModal(true); setLoading(false);
   };
 
   const handleUpdateStatus = async (id: string, status: DocStatus) => {
+    try {
+      await api.documents.update(id, { status });
+    } catch {}
     setDocs(prev => prev.map(d => d.id === id ? { ...d, status } : d));
   };
 

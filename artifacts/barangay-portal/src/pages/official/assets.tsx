@@ -1,11 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockAssets } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { Package, Plus, X, Search, Pencil, Trash2, MapPin, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -76,7 +76,7 @@ function AssetThumbnail({ imageUrl, name, size = "md" }: { imageUrl?: string; na
 export default function OfficialAssetsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [assets, setAssets] = useState<Asset[]>(enrichMockAssets(mockAssets as any[]));
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Asset | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -86,6 +86,10 @@ export default function OfficialAssetsPage() {
   const [form, setForm] = useState(emptyForm);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const detailFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    api.assets.list().then(data => setAssets(enrichMockAssets(data as any[]))).catch(console.error);
+  }, []);
 
   const filtered = assets.filter(a => {
     const m = a.name.toLowerCase().includes(search.toLowerCase())
@@ -124,7 +128,8 @@ export default function OfficialAssetsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await api.assets.delete(id);
     setAssets(prev => prev.filter(a => a.id !== id));
     setSelected(null);
     toast({ title: "Asset Removed", description: "The asset has been deleted from inventory." });
@@ -135,40 +140,28 @@ export default function OfficialAssetsPage() {
     onUrl(url);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      name: form.name,
+      category: form.category,
+      description: form.description,
+      quantity: parseInt(form.quantity) || 1,
+      status: form.status,
+      location: form.location,
+      accountableOfficer: form.accountableOfficer,
+      acquisitionDate: form.acquisitionDate,
+      acquisitionCost: parseFloat(form.acquisitionCost) || 0,
+      serialNumber: form.serialNumber || undefined,
+      imageUrl: form.imageUrl || undefined,
+    };
     if (editingId) {
-      setAssets(prev => prev.map(a => a.id === editingId ? {
-        ...a,
-        name: form.name,
-        category: form.category,
-        description: form.description,
-        quantity: parseInt(form.quantity) || 1,
-        status: form.status,
-        location: form.location,
-        accountableOfficer: form.accountableOfficer,
-        acquisitionDate: form.acquisitionDate,
-        acquisitionCost: parseFloat(form.acquisitionCost) || 0,
-        serialNumber: form.serialNumber || undefined,
-        imageUrl: form.imageUrl || undefined,
-      } : a));
+      const updated = await api.assets.update(editingId, payload);
+      setAssets(prev => prev.map(a => a.id === editingId ? { ...a, ...updated } as Asset : a));
       toast({ title: "Asset Updated", description: `"${form.name}" has been updated.` });
     } else {
-      const newAsset: Asset = {
-        id: `AST-00${assets.length + 5}`,
-        name: form.name,
-        category: form.category,
-        description: form.description,
-        quantity: parseInt(form.quantity) || 1,
-        status: form.status,
-        location: form.location,
-        accountableOfficer: form.accountableOfficer,
-        acquisitionDate: form.acquisitionDate,
-        acquisitionCost: parseFloat(form.acquisitionCost) || 0,
-        serialNumber: form.serialNumber || undefined,
-        imageUrl: form.imageUrl || undefined,
-      };
-      setAssets(prev => [newAsset, ...prev]);
+      const created = await api.assets.create(payload);
+      setAssets(prev => [created as Asset, ...prev]);
       toast({ title: "Asset Registered", description: `"${form.name}" added to inventory.` });
     }
     setShowForm(false);

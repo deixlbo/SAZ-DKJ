@@ -1,24 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
-import { mockAnnouncements } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import { Megaphone, Search, AlertTriangle, CalendarDays, User, X } from "lucide-react";
 
 export default function ResidentAnnouncementsPage() {
   const { toggle } = useSidebarToggle();
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<typeof mockAnnouncements[0] | null>(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [selected, setSelected] = useState<any | null>(null);
 
-  const filtered = mockAnnouncements.filter(a =>
+  useEffect(() => {
+    api.announcements.list().then(setAnnouncements).catch(console.error);
+  }, []);
+
+  const filtered = announcements.filter(a =>
     a.title.toLowerCase().includes(search.toLowerCase()) ||
     a.content.toLowerCase().includes(search.toLowerCase()) ||
-    a.category.toLowerCase().includes(search.toLowerCase())
+    (a.category ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const priorityBadge = {
+  const priorityBadge: Record<string, string> = {
     high: "bg-red-100 text-red-700 border-red-200",
     medium: "bg-amber-100 text-amber-700 border-amber-200",
     low: "bg-green-100 text-green-700 border-green-200",
@@ -28,15 +33,14 @@ export default function ResidentAnnouncementsPage() {
     <div className="flex-1 flex flex-col">
       <PortalHeader title="Announcements" description="Official barangay news and updates" onMenuClick={toggle} />
 
-      {/* Announcement Document Viewer */}
       {selected && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
           <Card className="w-full max-w-3xl shadow-2xl my-4 bg-white">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="border-primary/30 text-primary">{selected.category}</Badge>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${priorityBadge[selected.priority]}`}>
-                  {selected.priority === "high" ? "Urgent" : selected.priority.charAt(0).toUpperCase() + selected.priority.slice(1)} Priority
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${priorityBadge[selected.priority] ?? ""}`}>
+                  {selected.priority === "high" ? "Urgent" : selected.priority?.charAt(0).toUpperCase() + selected.priority?.slice(1)} Priority
                 </span>
               </div>
               <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted">
@@ -55,7 +59,7 @@ export default function ResidentAnnouncementsPage() {
                   <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{selected.author}</span>
                   <span className="flex items-center gap-1">
                     <CalendarDays className="w-3.5 h-3.5" />
-                    {new Date(selected.date).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}
+                    {selected.date ? new Date(selected.date).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" }) : ""}
                   </span>
                 </div>
               </div>
@@ -112,7 +116,7 @@ export default function ResidentAnnouncementsPage() {
                     <p className="text-xs text-muted-foreground line-clamp-2">{ann.content}</p>
                     <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground/70">
                       <span className="flex items-center gap-1"><User className="w-3 h-3" />{ann.author}</span>
-                      <span>{new Date(ann.date).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" })}</span>
+                      <span>{ann.date ? new Date(ann.date).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : ""}</span>
                     </div>
                   </div>
                 </div>

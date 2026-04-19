@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { MiniCalendar } from "@/components/portal/mini-calendar";
-import { mockDocumentRequests } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   FileText, Search, CheckCircle2, XCircle, Clock, AlertCircle, Eye,
   Printer, CalendarDays, List, FileQuestion, Settings, Plus, Trash2,
@@ -205,7 +205,7 @@ function ReceiptDocument({ doc, onClose }: { doc: DocRequest; onClose: () => voi
 export default function OfficialDocumentsPage() {
   const { toggle } = useSidebarToggle();
   const { toast } = useToast();
-  const [docs, setDocs] = useState<DocRequest[]>(mockDocumentRequests as DocRequest[]);
+  const [docs, setDocs] = useState<DocRequest[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | DocStatus>("all");
   const [selected, setSelected] = useState<DocRequest | null>(null);
@@ -222,6 +222,10 @@ export default function OfficialDocumentsPage() {
   const [newDocTypeName, setNewDocTypeName] = useState("");
   const [newReq, setNewReq] = useState("");
 
+  useEffect(() => {
+    api.documents.list().then(data => setDocs(data as DocRequest[])).catch(console.error);
+  }, []);
+
   const markedDates = docs.map(d => d.date);
   const getDateCount = (date: string) => docs.filter(d => d.date === date).length;
 
@@ -234,7 +238,8 @@ export default function OfficialDocumentsPage() {
     return matchSearch && matchFilter && matchDate;
   });
 
-  const updateDoc = (id: string, patch: Partial<DocRequest>) => {
+  const updateDoc = async (id: string, patch: Partial<DocRequest>) => {
+    await api.documents.update(id, patch);
     setDocs(prev => prev.map(d => d.id === id ? { ...d, ...patch } : d));
     setSelected(prev => prev?.id === id ? { ...prev, ...patch } as DocRequest : prev);
   };

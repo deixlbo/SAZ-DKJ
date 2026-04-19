@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PortalHeader } from "@/components/portal/header";
 import { useSidebarToggle } from "@/components/portal/portal-layout";
 import { useAuth } from "@/lib/auth-context";
-import { mockDocumentRequests, mockBlotterCases, mockResidents, mockAnnouncements, mockProjects } from "@/lib/mock-data";
+import { api } from "@/lib/api";
 import {
   Users, FileText, ClipboardList, FolderKanban,
   CheckCircle2, ArrowRight
@@ -13,17 +14,30 @@ import {
 export default function OfficialDashboard() {
   const { userData } = useAuth();
   const { toggle } = useSidebarToggle();
+  const [allDocs, setAllDocs] = useState<any[]>([]);
+  const [allBlotter, setAllBlotter] = useState<any[]>([]);
+  const [allResidents, setAllResidents] = useState<any[]>([]);
+  const [allAnn, setAllAnn] = useState<any[]>([]);
+  const [allProjects, setAllProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.documents.list().then(setAllDocs).catch(console.error);
+    api.blotter.list().then(setAllBlotter).catch(console.error);
+    api.residents.list().then(setAllResidents).catch(console.error);
+    api.announcements.list().then(setAllAnn).catch(console.error);
+    api.projects.list().then(setAllProjects).catch(console.error);
+  }, []);
 
   const stats = [
-    { label: "Total Residents", value: mockResidents.length + 4820, icon: Users, color: "text-blue-600 bg-blue-50 border-blue-200", href: "/official/residents" },
-    { label: "Pending Documents", value: mockDocumentRequests.filter(d => d.status === "pending" || d.status === "processing").length, icon: FileText, color: "text-amber-600 bg-amber-50 border-amber-200", href: "/official/documents" },
-    { label: "Active Cases", value: mockBlotterCases.filter(b => b.status !== "resolved").length, icon: ClipboardList, color: "text-red-600 bg-red-50 border-red-200", href: "/official/blotter" },
-    { label: "Ongoing Projects", value: mockProjects.filter(p => p.status === "ongoing").length, icon: FolderKanban, color: "text-purple-600 bg-purple-50 border-purple-200", href: "/official/projects" },
+    { label: "Total Residents", value: allResidents.length + 4820, icon: Users, color: "text-blue-600 bg-blue-50 border-blue-200", href: "/official/residents" },
+    { label: "Pending Documents", value: allDocs.filter(d => d.status === "pending" || d.status === "processing").length, icon: FileText, color: "text-amber-600 bg-amber-50 border-amber-200", href: "/official/documents" },
+    { label: "Active Cases", value: allBlotter.filter(b => b.status !== "resolved").length, icon: ClipboardList, color: "text-red-600 bg-red-50 border-red-200", href: "/official/blotter" },
+    { label: "Ongoing Projects", value: allProjects.filter(p => p.status === "ongoing").length, icon: FolderKanban, color: "text-purple-600 bg-purple-50 border-purple-200", href: "/official/projects" },
   ];
 
-  const pendingDocs = mockDocumentRequests.filter(d => d.status === "pending" || d.status === "processing").slice(0, 4);
-  const recentBlotter = mockBlotterCases.filter(b => b.status !== "resolved").slice(0, 3);
-  const recentAnn = mockAnnouncements.slice(0, 3);
+  const pendingDocs = allDocs.filter(d => d.status === "pending" || d.status === "processing").slice(0, 4);
+  const recentBlotter = allBlotter.filter(b => b.status !== "resolved").slice(0, 3);
+  const recentAnn = allAnn.slice(0, 3);
 
   const statusColor = {
     approved: "text-emerald-600 bg-emerald-50",
