@@ -354,7 +354,7 @@ export default function ResidentDocumentsPage() {
       {/* Receipt Modal */}
       {receiptDoc && <ReceiptModal doc={receiptDoc} onClose={() => setReceiptDoc(null)} />}
 
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Tabs */}
         <div className="flex gap-2">
           <button onClick={() => setActiveTab("available")} className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${activeTab === "available" ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>

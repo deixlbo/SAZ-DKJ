@@ -72,7 +72,7 @@ export default function ResidentAnnouncementsPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         <div className="relative mb-5">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input

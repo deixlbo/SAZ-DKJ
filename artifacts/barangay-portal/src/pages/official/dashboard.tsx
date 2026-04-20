@@ -63,7 +63,7 @@ export default function OfficialDashboard() {
         showNotifications
       />
 
-      <div className="p-4 sm:p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Stats Grid */}
         <section>
           <h2 className="font-semibold text-foreground mb-3">Overview</h2>

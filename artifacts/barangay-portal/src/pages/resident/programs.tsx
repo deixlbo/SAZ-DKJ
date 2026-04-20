@@ -46,7 +46,7 @@ export default function ResidentProgramsPage() {
     <div className="flex-1 flex flex-col">
       <PortalHeader title="Community Programs" description="Barangay projects and events" onMenuClick={toggle} />
 
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Filters */}
         <div className="flex gap-2 flex-wrap">
           {(["all", "planning", "ongoing", "completed"] as const).map(f => (

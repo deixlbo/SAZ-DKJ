@@ -122,7 +122,7 @@ export default function ResidentNotificationsPage() {
         }
       />
 
-      <div className="p-4 sm:p-6 space-y-4 max-w-3xl mx-auto w-full">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-4 max-w-3xl mx-auto w-full">
         {unreadCount > 0 && (
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium text-foreground">

@@ -21,7 +21,7 @@ export default function ResidentProfilePage() {
     <div className="flex-1 flex flex-col">
       <PortalHeader title="My Profile" description="Your personal information" onMenuClick={toggle} />
 
-      <div className="p-4 sm:p-6 space-y-5">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-5">
         {/* Avatar & Name Banner */}
         <Card className="p-6">
           <div className="flex items-center gap-5 mb-6">

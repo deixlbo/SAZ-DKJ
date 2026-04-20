@@ -153,7 +153,7 @@ export default function OfficialBusinessesPage() {
         }
       />
 
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-4">
         {/* Expiry Notifications Banner */}
         {expiringSoon.length > 0 && (
           <Card className="p-4 border-orange-200 bg-orange-50">

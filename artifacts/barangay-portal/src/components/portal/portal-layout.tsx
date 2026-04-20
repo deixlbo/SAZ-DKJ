@@ -15,9 +15,11 @@ export function PortalLayout({ children }: { children: React.ReactNode }) {
     <NotificationsProvider role={userData?.role ?? null}>
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className="flex-1 overflow-y-auto flex flex-col">
+        <main className="flex-1 overflow-y-auto flex flex-col animate-in fade-in duration-300">
           <SidebarToggleContext.Provider value={{ toggle: () => setSidebarOpen(true) }}>
-            {children}
+            <div className="animate-in slide-in-from-bottom-4 duration-300">
+              {children}
+            </div>
           </SidebarToggleContext.Provider>
         </main>
       </div>

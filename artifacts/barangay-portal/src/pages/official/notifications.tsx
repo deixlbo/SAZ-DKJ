@@ -127,7 +127,7 @@ export default function OfficialNotificationsPage() {
         }
       />
 
-      <div className="p-4 sm:p-6 space-y-6 max-w-3xl mx-auto w-full">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-6 max-w-3xl mx-auto w-full">
         {unreadCount > 0 && (
           <div className="p-3 bg-primary/5 border border-primary/15 rounded-xl text-sm">
             You have <span className="text-primary font-bold">{unreadCount}</span> unread notification{unreadCount !== 1 ? "s" : ""}. Click on any notification to mark it as read.

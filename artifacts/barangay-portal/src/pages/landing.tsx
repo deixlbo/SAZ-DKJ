@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   FileText, Megaphone, ClipboardList, Users, Phone, MapPin, Clock,
   Shield, Heart, AlertTriangle, Menu, X, Building2, CheckCircle2,
-  ChevronRight, Sparkles, Globe
+  ChevronRight, Sparkles, Globe, LayoutDashboard, Lock
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -14,6 +14,7 @@ export default function LandingPage() {
   const { userData } = useAuth();
 
   const getDashboardUrl = () => {
+    if (userData?.role === "admin") return "/admin/dashboard";
     if (userData?.role === "official") return "/official/dashboard";
     if (userData?.role === "resident") return "/resident/dashboard";
     return null;
@@ -84,6 +85,12 @@ export default function LandingPage() {
                       Official Login
                     </Button>
                   </Link>
+                  <Link href="/login/admin">
+                    <Button size="sm" variant="outline" className="border-sidebar-foreground/30 text-sidebar-foreground hover:bg-sidebar-accent/40 gap-1.5">
+                      <Lock className="w-4 h-4" />
+                      Admin
+                    </Button>
+                  </Link>
                 </>
               )}
             </div>
@@ -108,7 +115,7 @@ export default function LandingPage() {
                 {dashboardUrl ? (
                   <Link href={dashboardUrl} onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground justify-start gap-2" size="sm">
-                      <Users className="w-4 h-4" /> Go to Dashboard
+                      <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
                     </Button>
                   </Link>
                 ) : (
@@ -121,6 +128,11 @@ export default function LandingPage() {
                     <Link href="/login/official" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full border-sidebar-foreground/30 text-sidebar-foreground justify-start gap-2" size="sm">
                         <Shield className="w-4 h-4" /> Official Login
+                      </Button>
+                    </Link>
+                    <Link href="/login/admin" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full border-sidebar-foreground/30 text-sidebar-foreground justify-start gap-2" size="sm">
+                        <Lock className="w-4 h-4" /> Admin Login
                       </Button>
                     </Link>
                   </>

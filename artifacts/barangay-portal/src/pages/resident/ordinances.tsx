@@ -130,7 +130,7 @@ export default function ResidentOrdinancesPage() {
 
       {selected && <OrdinanceDocument ord={selected} onClose={() => setSelected(null)} />}
 
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />

@@ -11,7 +11,8 @@ import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import ResidentLoginPage from "@/pages/login/resident-login";
 import OfficialLoginPage from "@/pages/login/official-login";
-import RegisterPage from "@/pages/register";
+import AdminLoginPage from "@/pages/login/admin-login";
+import RegisterPage from "@/pages/register-new";
 
 // Resident portal pages
 import ResidentDashboard from "@/pages/resident/dashboard";
@@ -20,6 +21,9 @@ import ResidentAnnouncementsPage from "@/pages/resident/announcements";
 import ResidentBlotterPage from "@/pages/resident/blotter";
 import ResidentProfilePage from "@/pages/resident/profile";
 import ResidentOrdinancesPage from "@/pages/resident/ordinances";
+
+// Admin portal pages
+import AdminDashboard from "@/pages/admin/dashboard";
 
 // Official portal pages
 import OfficialDashboard from "@/pages/official/dashboard";
@@ -35,17 +39,17 @@ import OfficialProfilePage from "@/pages/official/profile";
 
 const queryClient = new QueryClient();
 
-function RequireAuth({ role, children }: { role?: "resident" | "official"; children: React.ReactNode }) {
+function RequireAuth({ role, children }: { role?: "admin" | "resident" | "official"; children: React.ReactNode }) {
   const { user, userData } = useAuth();
   const [location] = useLocation();
 
   if (!user) {
-    const loginPath = role === "official" ? "/login/official" : "/login/resident";
+    const loginPath = role === "official" ? "/login/official" : role === "admin" ? "/login/admin" : "/login/resident";
     return <Redirect to={loginPath} />;
   }
 
   if (role && userData?.role !== role) {
-    return <Redirect to={userData?.role === "official" ? "/official/dashboard" : "/resident/dashboard"} />;
+    return <Redirect to={userData?.role === "admin" ? "/admin/dashboard" : userData?.role === "official" ? "/official/dashboard" : "/resident/dashboard"} />;
   }
 
   return <>{children}</>;
@@ -58,7 +62,15 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login/resident" component={ResidentLoginPage} />
       <Route path="/login/official" component={OfficialLoginPage} />
+      <Route path="/login/admin" component={AdminLoginPage} />
       <Route path="/register" component={RegisterPage} />
+
+      {/* Admin portal routes */}
+      <Route path="/admin/dashboard">
+        <RequireAuth role="admin">
+          <AdminDashboard />
+        </RequireAuth>
+      </Route>
 
       {/* Resident portal routes */}
       <Route path="/resident/dashboard">

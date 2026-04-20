@@ -21,7 +21,7 @@ export default function OfficialProfilePage() {
     <div className="flex-1 flex flex-col">
       <PortalHeader title="My Profile" description="Official account information" onMenuClick={toggle} />
 
-      <div className="p-4 sm:p-6 space-y-5">
+      <div className="p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-5">
         <Card className="p-6">
           <div className="flex items-start gap-5 mb-6">
             <div className="w-24 h-24 rounded-full bg-sidebar/10 border-4 border-sidebar/20 flex items-center justify-center shrink-0 overflow-hidden">

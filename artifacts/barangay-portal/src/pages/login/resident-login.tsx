@@ -10,15 +10,15 @@ import { useAuth } from "@/lib/auth-context";
 export default function ResidentLoginPage() {
   const { login, loading, error, clearError } = useAuth();
   const [, setLocation] = useLocation();
-  const [email, setEmail] = useState("juan@email.com");
-  const [password, setPassword] = useState("password");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
     try {
-      await login(email, password, "resident");
+      await login(email, password);
       setLocation("/resident/dashboard");
     } catch {}
   };
@@ -110,11 +110,7 @@ export default function ResidentLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-border/50">
-            <p className="text-xs text-muted-foreground text-center">
-              Demo: <span className="font-medium text-foreground">juan@email.com</span> / any password (4+ chars)
-            </p>
-          </div>
+
 
           <div className="mt-4 space-y-3">
             <Link href="/register">
